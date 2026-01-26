@@ -1,5 +1,10 @@
-﻿using System.Windows;
+﻿using EquipmentManagement.Client.Equipment;
+using EquipmentManagement.Client.Inventory;
+using System;
+using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace EquipmentManagement.Client
@@ -10,113 +15,259 @@ namespace EquipmentManagement.Client
         {
             InitializeComponent();
 
-            // Показываем имя текущего пользователя
-            //CurrentUserText.Text = LoginWindow.CurrentUser;
-            //WelcomeUserText.Text = $"Вы вошли как: {LoginWindow.CurrentUser}";
 
-            // Можно добавить логику в зависимости от роли пользователя
-            SetUserPermissions(LoginWindow.CurrentUser);
-        }
-
-        private void SetUserPermissions(string username)
-        {
-            // Пример: ограничения для разных пользователей
-            if (username == "teacher" || username == "user")
-            {
-                // Для преподавателей и сотрудников скрываем некоторые кнопки
-                ReferencesButton.Visibility = Visibility.Collapsed;
-                // AddEquipmentButton.IsEnabled = false; // или так
-            }
+            // Показываем приветствие
+            ShowWelcomeScreen();
         }
 
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            // Создаём новое окно входа
             var loginWindow = new LoginWindow();
-
-            // Закрываем главное окно
-            this.Close();
-
-            // Показываем окно входа
             loginWindow.Show();
+            this.Close();
         }
 
         private void EquipmentListButton_Click(object sender, RoutedEventArgs e)
         {
-            // Меняем заголовок
-            ChangeTitle("Список оборудования");
-
-            // Очищаем контент
-            ContentGrid.Children.Clear();
-
-            // Создаём и добавляем список оборудования
-            //var equipmentList = new EquipmentListView();
-            //ContentGrid.Children.Add(equipmentList);
+            // ОТКРЫВАЕМ ОКНО СПИСКА ОБОРУДОВАНИЯ
+            var equipmentWindow = new EquipmentListWindow();
+            equipmentWindow.Show();  // ⚠️ НЕ ShowDialog()!
         }
 
         private void AddEquipmentButton_Click(object sender, RoutedEventArgs e)
         {
-            ChangeTitle("Добавление оборудования");
-
-            ContentGrid.Children.Clear();
-
-            // Создаём форму добавления оборудования
-            //var addForm = new EquipmentAddForm();
-            //ContentGrid.Children.Add(addForm);
+            // Открываем окно добавления оборудования
+            var addWindow = new EquipmentEditWindow();
+            addWindow.ShowDialog(); // Это диалоговое окно
         }
 
         private void RoomsButton_Click(object sender, RoutedEventArgs e)
         {
-            ChangeTitle("Список аудиторий");
-
-            ContentGrid.Children.Clear();
-
-            // Заглушка для аудиторий
-            var placeholder = CreatePlaceholder("", "Управление аудиториями",
-                "Здесь будет список аудиторий и управление ими");
-            ContentGrid.Children.Add(placeholder);
+            ShowRoomsList();
         }
 
         private void InventoryButton_Click(object sender, RoutedEventArgs e)
         {
-            ChangeTitle("Инвентаризация");
-
-            ContentGrid.Children.Clear();
-
-            var placeholder = CreatePlaceholder("", "Проведение инвентаризации",
-                "Выберите оборудование для проверки и отметьте его состояние");
-            ContentGrid.Children.Add(placeholder);
+            ShowInventoryScreen();
         }
 
         private void ReportsButton_Click(object sender, RoutedEventArgs e)
         {
-            ChangeTitle("Отчёты");
-
-            ContentGrid.Children.Clear();
-
-            var placeholder = CreatePlaceholder("", "Формирование отчётов",
-                "Генерация актов приёма-передачи и других документов");
-            ContentGrid.Children.Add(placeholder);
+            ShowReportsScreen();
         }
 
         private void ReferencesButton_Click(object sender, RoutedEventArgs e)
         {
-            ChangeTitle("Справочники");
+            ShowReferencesScreen();
+        }
 
+        // ========== МЕТОДЫ ДЛЯ ПОКАЗА КОНТЕНТА ==========
+
+        private void ShowWelcomeScreen()
+        {
+            ChangeTitle("Главная");
             ContentGrid.Children.Clear();
 
-            var placeholder = CreatePlaceholder("", "Управление справочниками",
-                "Направления, статусы, типы оборудования и другие справочные данные");
-            ContentGrid.Children.Add(placeholder);
+            var welcomePanel = CreateWelcomePanel();
+            ContentGrid.Children.Add(welcomePanel);
         }
+
+        private void ShowRoomsList()
+        {
+            ChangeTitle("Список аудиторий");
+            ContentGrid.Children.Clear();
+
+            // Создаём простой список аудиторий
+            var roomsPanel = CreateSimpleRoomsPanel();
+            ContentGrid.Children.Add(roomsPanel);
+        }
+
+        private void ShowInventoryScreen()
+        {
+            ChangeTitle("Инвентаризация");
+            ContentGrid.Children.Clear();
+
+            // Создаём панель для запуска инвентаризации
+            var inventoryPanel = CreateInventoryStartPanel();
+            ContentGrid.Children.Add(inventoryPanel);
+        }
+
+        private void ShowReportsScreen()
+        {
+            ChangeTitle("Отчёты");
+            ContentGrid.Children.Clear();
+
+            var reportsPanel = CreatePlaceholder("📊", "Формирование отчётов",
+                "Здесь будут отчёты по оборудованию, аудиториям и инвентаризациям");
+            ContentGrid.Children.Add(reportsPanel);
+        }
+
+        private void ShowReferencesScreen()
+        {
+            ChangeTitle("Справочники");
+            ContentGrid.Children.Clear();
+
+            var referencesPanel = CreatePlaceholder("📚", "Управление справочниками",
+                "Направления, статусы, типы оборудования и другие справочные данные");
+            ContentGrid.Children.Add(referencesPanel);
+        }
+
+        // ========== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ==========
 
         private void ChangeTitle(string newTitle)
         {
-            // Находим TextBlock с заголовком (второй TextBlock в шапке)
-            var headerGrid = (Grid)((Border)((DockPanel)Content).Children[0]).Child;
-            var titleTextBlock = (TextBlock)((Grid)headerGrid).Children[1];
-            titleTextBlock.Text = newTitle;
+            // Просто меняем заголовок окна
+            this.Title = $"Учёт оборудования - {newTitle}";
+        }
+
+        private StackPanel CreateWelcomePanel()
+        {
+            var panel = new StackPanel
+            {
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "🏢",
+                FontSize = 80,
+                Foreground = Brushes.LightGray,
+                HorizontalAlignment = HorizontalAlignment.Center
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "Добро пожаловать в систему учёта оборудования!",
+                FontSize = 24,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 20, 0, 10),
+                HorizontalAlignment = HorizontalAlignment.Center
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "Выберите раздел в меню слева для начала работы.",
+                FontSize = 16,
+                Foreground = Brushes.Gray,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextAlignment = TextAlignment.Center,
+                Width = 400
+            });
+
+            // Создаём и добавляем TextBlock для имени пользователя
+            var userTextBlock = new TextBlock
+            {
+                Name = "WelcomeUserText",
+                Text = $"Вы вошли как: {LoginWindow.CurrentUser}",
+                FontSize = 14,
+                Foreground = new SolidColorBrush(Color.FromRgb(0, 96, 172)),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 30, 0, 0)
+            };
+
+            panel.Children.Add(userTextBlock);
+
+            return panel;
+        }
+
+        private StackPanel CreateSimpleRoomsPanel()
+        {
+            var panel = new StackPanel
+            {
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "🏫",
+                FontSize = 80,
+                Foreground = Brushes.LightGray,
+                HorizontalAlignment = HorizontalAlignment.Center
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "Список аудиторий",
+                FontSize = 24,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 20, 0, 10),
+                HorizontalAlignment = HorizontalAlignment.Center
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "Здесь будет таблица со всеми аудиториями учебного заведения.",
+                FontSize = 16,
+                Foreground = Brushes.Gray,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextAlignment = TextAlignment.Center,
+                Width = 400,
+                Margin = new Thickness(0, 0, 0, 20)
+            });
+
+            return panel;
+        }
+
+        private StackPanel CreateInventoryStartPanel()
+        {
+            var panel = new StackPanel
+            {
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "📋",
+                FontSize = 80,
+                Foreground = Brushes.LightGray,
+                HorizontalAlignment = HorizontalAlignment.Center
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "Инвентаризация оборудования",
+                FontSize = 24,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 20, 0, 10),
+                HorizontalAlignment = HorizontalAlignment.Center
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "Проверьте наличие и состояние оборудования в аудиториях",
+                FontSize = 16,
+                Foreground = Brushes.Gray,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextAlignment = TextAlignment.Center,
+                Width = 400,
+                Margin = new Thickness(0, 0, 0, 30)
+            });
+
+            var startButton = new Button
+            {
+                Content = "Начать новую инвентаризацию",
+                Width = 250,
+                Height = 45,
+                Background = new SolidColorBrush(Color.FromRgb(0, 96, 172)),
+                Foreground = Brushes.White,
+                FontSize = 15,
+                FontWeight = FontWeights.Bold,
+                Cursor = Cursors.Hand,
+                Margin = new Thickness(0, 10, 0, 0)
+            };
+
+            startButton.Click += (s, args) =>
+            {
+                StartInventoryProcess();
+            };
+
+            panel.Children.Add(startButton);
+
+            return panel;
         }
 
         private StackPanel CreatePlaceholder(string emoji, string title, string description)
@@ -155,6 +306,42 @@ namespace EquipmentManagement.Client
             });
 
             return panel;
+        }
+
+        private void StartInventoryProcess()
+        {
+            try
+            {
+                // Шаг 1: Основные данные
+                var step1 = new InventoryStartWindow();
+                if (step1.ShowDialog() != true)
+                    return;
+
+                // Шаг 2: Выбор оборудования
+                var step2 = new InventorySelectWindow(
+                    step1.InventoryName,
+                    step1.StartDate,
+                    step1.EndDate,
+                    step1.InventoryType);
+
+                if (step2.ShowDialog() != true)
+                    return;
+
+                // Шаг 3: Проведение инвентаризации
+                var step3 = new InventoryProcessWindow(
+                    step1.InventoryName,
+                    step2.SelectedEquipmentIds);
+
+                step3.ShowDialog();
+
+                MessageBox.Show("Инвентаризация завершена!", "Информация",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
