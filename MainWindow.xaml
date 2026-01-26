@@ -1,12 +1,309 @@
 ﻿<Window x:Class="EquipmentManagement.Client.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EquipmentManagement.Client"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Учёт оборудования"
+        Height="700"
+        Width="1200"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized">
+
     <Grid>
+        <!-- Меню сверху -->
+        <DockPanel>
+            <!-- Шапка -->
+            <Border DockPanel.Dock="Top"
+                    Background="#FF0060AC"
+                Height="60">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Логотип и название -->
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="20,0,0,0">
+                        <TextBlock Text="📦"
+                                   FontSize="24"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="Учёт оборудования"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"
+                                   Margin="10,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Заголовок текущей страницы -->
+                    <TextBlock Grid.Column="1"
+                               Text="Главная"
+                               FontSize="16"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"/>
+
+                    <!-- Информация о пользователе -->
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="0,0,20,0">
+                        <TextBlock Text="👤"
+                                   FontSize="16"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock x:Name="CurrentUserText"
+                                   Text="Администратор"
+                                   FontSize="14"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"
+                                   Margin="5,0,20,0"/>
+                        <Button x:Name="LogoutButton"
+                                Content="Выйти"
+                                Width="80"
+                                Height="30"
+                                Background="Transparent"
+                                BorderBrush="White"
+                                BorderThickness="1"
+                                Foreground="White"
+                                Cursor="Hand"
+                                Click="LogoutButton_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Основной контент -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220"/>
+                    <!-- Меню -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- Контент -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Левое меню -->
+                <Border Grid.Column="0"
+                        Background="#FF9EA1A2"
+                    BorderBrush="#CCCCCC"
+                        BorderThickness="0,0,1,0">
+                    <StackPanel Margin="10">
+
+                        <!-- Раздел "Оборудование" -->
+                        <TextBlock Text="ОБОРУДОВАНИЕ"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Margin="0,20,0,10"
+                                   Foreground="#333333"/>
+
+                        <Button x:Name="EquipmentListButton"
+                                Content="Список оборудования"
+                                Height="40"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                HorizontalContentAlignment="Left"
+                                Padding="15,0,0,0"
+                                FontSize="14"
+                                Cursor="Hand"
+                                Click="EquipmentListButton_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Foreground" Value="#333333"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#E0E0E0"/>
+                                            <Setter Property="Foreground" Value="#FF0060AC"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <Button x:Name="AddEquipmentButton"
+                                Content="Добавить оборудование"
+                                Height="40"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                HorizontalContentAlignment="Left"
+                                Padding="15,0,0,0"
+                                FontSize="14"
+                                Cursor="Hand"
+                                Click="AddEquipmentButton_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Foreground" Value="#333333"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#E0E0E0"/>
+                                            <Setter Property="Foreground" Value="#FF0060AC"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Раздел "Аудитории" -->
+                        <TextBlock Text="АУДИТОРИИ"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Margin="0,30,0,10"
+                                   Foreground="#333333"/>
+
+                        <Button x:Name="RoomsButton"
+                                Height="40"
+                                Content="Список аудиторий"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                HorizontalContentAlignment="Left"
+                                Padding="15,0,0,0"
+                                FontSize="14"
+                                Cursor="Hand"
+                                Click="RoomsButton_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Foreground" Value="#333333"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#E0E0E0"/>
+                                            <Setter Property="Foreground" Value="#FF0060AC"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Раздел "Инвентаризация" -->
+                        <TextBlock Text="ИНВЕНТАРИЗАЦИЯ"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Margin="0,30,0,10"
+                                   Foreground="#333333"/>
+
+                        <Button x:Name="InventoryButton"
+                                Content="Провести инвентаризацию"
+                                Height="40"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                HorizontalContentAlignment="Left"
+                                Padding="15,0,0,0"
+                                FontSize="14"
+                                Cursor="Hand"
+                                Click="InventoryButton_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Foreground" Value="#333333"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#E0E0E0"/>
+                                            <Setter Property="Foreground" Value="#FF0060AC"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Раздел "Отчёты" -->
+                        <TextBlock Text="ОТЧЁТЫ"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Margin="0,30,0,10"
+                                   Foreground="#333333"/>
+
+                        <Button x:Name="ReportsButton"
+                                Content="Сформировать отчёт"
+                                Height="40"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                HorizontalContentAlignment="Left"
+                                Padding="15,0,0,0"
+                                FontSize="14"
+                                Cursor="Hand"
+                                Click="ReportsButton_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Foreground" Value="#333333"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#E0E0E0"/>
+                                            <Setter Property="Foreground" Value="#FF0060AC"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Раздел "Справочники" -->
+                        <TextBlock Text="СПРАВОЧНИКИ"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Margin="0,30,0,10"
+                                   Foreground="#333333"/>
+
+                        <Button x:Name="ReferencesButton"
+                                Content="Управление справочниками"
+                                Height="40"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                HorizontalContentAlignment="Left"
+                                Padding="15,0,0,0"
+                                FontSize="14"
+                                Cursor="Hand"
+                                Click="ReferencesButton_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Foreground" Value="#333333"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#E0E0E0"/>
+                                            <Setter Property="Foreground" Value="#FF0060AC"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                    </StackPanel>
+                </Border>
+
+                <!-- Область контента -->
+                <Border Grid.Column="1"
+                        Background="White">
+
+                    <!-- Здесь будет меняться контент -->
+                    <Grid x:Name="ContentGrid">
+
+                        <!-- Заглушка "Главная страница" -->
+                        <StackPanel VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Visibility="Visible">
+                            <TextBlock Text="Добро пожаловать в систему учёта оборудования!"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Margin="0,20,0,10"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Выберите раздел в меню слева для начала работы."
+                                       FontSize="16"
+                                       Foreground="#666666"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       Width="400"/>
+                            <TextBlock x:Name="WelcomeUserText"
+                                       Text=""
+                                       FontSize="14"
+                                       Foreground="#FF0060AC"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,30,0,0"/>
+                        </StackPanel>
+
+                    </Grid>
+
+                </Border>
+
+            </Grid>
+
+        </DockPanel>
 
     </Grid>
 </Window>
