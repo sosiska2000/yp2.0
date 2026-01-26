@@ -26,10 +26,6 @@
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center"
                                 Margin="20,0,0,0">
-                        <TextBlock Text="📦"
-                                   FontSize="24"
-                                   Foreground="White"
-                                   VerticalAlignment="Center"/>
                         <TextBlock Text="Учёт оборудования"
                                    FontSize="18"
                                    FontWeight="Bold"
@@ -51,16 +47,6 @@
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center"
                                 Margin="0,0,20,0">
-                        <TextBlock Text="👤"
-                                   FontSize="16"
-                                   Foreground="White"
-                                   VerticalAlignment="Center"/>
-                        <TextBlock x:Name="CurrentUserText"
-                                   Text="Администратор"
-                                   FontSize="14"
-                                   Foreground="White"
-                                   VerticalAlignment="Center"
-                                   Margin="5,0,20,0"/>
                         <Button x:Name="LogoutButton"
                                 Content="Выйти"
                                 Width="80"
