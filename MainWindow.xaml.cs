@@ -11,8 +11,8 @@ namespace EquipmentManagement.Client
             InitializeComponent();
 
             // Показываем имя текущего пользователя
-            CurrentUserText.Text = LoginWindow.CurrentUser;
-            WelcomeUserText.Text = $"Вы вошли как: {LoginWindow.CurrentUser}";
+            //CurrentUserText.Text = LoginWindow.CurrentUser;
+            //WelcomeUserText.Text = $"Вы вошли как: {LoginWindow.CurrentUser}";
 
             // Можно добавить логику в зависимости от роли пользователя
             SetUserPermissions(LoginWindow.CurrentUser);
