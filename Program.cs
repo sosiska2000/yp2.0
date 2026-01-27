@@ -12,7 +12,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Version = "v1",
         Title = "Информационная система учёта оборудования",
-        Description = "API для управления оборудованием, аудиториями, расходными материалами и инвентаризацией в учебном заведении"
+        Description = "API для управления инвентаризацией в учебном заведении"
     });
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
