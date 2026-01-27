@@ -28,6 +28,6 @@ public class Oborudovanie
     public TipOborudovania? TipOborudovania { get; set; }
     public VidModeli? VidModeli { get; set; }
 
-    // Связи многие-ко-многим
+
     public ICollection<Programma>? Programmy { get; set; }
 }
