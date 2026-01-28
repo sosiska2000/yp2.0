@@ -1,0 +1,232 @@
+﻿<Page x:Class="EquipmentManagement.Client.Pages.LoginPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:EquipmentManagement.Client.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="700" d:DesignWidth="800"
+      Title="Авторизация">
+
+    <Page.Resources>
+        <!-- Цветовая палитра по ТЗ -->
+        <SolidColorBrush x:Key="PrimaryBlue" Color="#0060AC"/>
+        <SolidColorBrush x:Key="AccentRed" Color="#E41613"/>
+        <SolidColorBrush x:Key="NeutralGray" Color="#9EA1A2"/>
+        <SolidColorBrush x:Key="LightGray" Color="#F5F5F5"/>
+        <SolidColorBrush x:Key="White" Color="White"/>
+        <SolidColorBrush x:Key="DarkGray" Color="#333333"/>
+
+        <!-- Стиль кнопки -->
+        <Style x:Key="LoginButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryBlue}"/>
+            <Setter Property="Foreground" Value="{StaticResource White}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#0077CC"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#005A99"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль текстового поля -->
+        <Style x:Key="LoginTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="{StaticResource White}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource NeutralGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{StaticResource DarkGray}"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                                          VerticalAlignment="Center"
+                                          HorizontalScrollBarVisibility="Hidden"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryBlue}"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль PasswordBox -->
+        <Style x:Key="LoginPasswordBoxStyle" TargetType="PasswordBox">
+            <Setter Property="Background" Value="{StaticResource White}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource NeutralGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{StaticResource DarkGray}"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="PasswordChar" Value="*"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                                          VerticalAlignment="Center"
+                                          HorizontalScrollBarVisibility="Hidden"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryBlue}"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <Grid Background="{StaticResource PrimaryBlue}" Margin="0,0,0,0">
+        <!-- Центральная панель входа -->
+        <Border Width="380" 
+                Background="{StaticResource White}"
+                CornerRadius="12"
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center">
+
+            <Grid Margin="40">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Логотип и заголовок -->
+                <StackPanel Grid.Row="0" 
+                            HorizontalAlignment="Center" 
+                            Margin="0,0,0,30">
+
+                    <!-- Логотип (символ замка в синем круге) -->
+                    <Border Width="70" 
+                            Height="70" 
+                            Background="{StaticResource PrimaryBlue}"
+                            CornerRadius="35"
+                            Margin="0,0,0,15">
+                        <TextBlock Text="🔐" 
+                                   FontSize="30" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource White}"/>
+                    </Border>
+
+                    <TextBlock Text="АВТОРИЗАЦИЯ" 
+                               FontSize="24" 
+                               FontWeight="Bold"
+                               Foreground="{StaticResource DarkGray}"
+                               HorizontalAlignment="Center"/>
+
+                    <TextBlock Text="Система управления оборудованием" 
+                               FontSize="13" 
+                               Foreground="{StaticResource NeutralGray}"
+                               HorizontalAlignment="Center"
+                               Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <!-- Форма входа -->
+                <StackPanel Grid.Row="1" 
+                            VerticalAlignment="Center">
+
+                    <!-- Поле логина -->
+                    <TextBlock Text="Логин пользователя" 
+                               FontSize="14" 
+                               Foreground="{StaticResource DarkGray}"
+                               Margin="0,0,0,8"/>
+
+                    <TextBox x:Name="login" 
+                             Style="{StaticResource LoginTextBoxStyle}"
+                             Height="45"
+                             Margin="0,0,0,20"/>
+
+                    <!-- Поле пароля -->
+                    <TextBlock Text="Пароль пользователя" 
+                               FontSize="14" 
+                               Foreground="{StaticResource DarkGray}"
+                               Margin="0,0,0,8"/>
+
+                    <PasswordBox x:Name="password" 
+                                 Style="{StaticResource LoginPasswordBoxStyle}"
+                                 Height="45"
+                                 Margin="0,0,0,30"/>
+
+                    <!-- Кнопка входа -->
+                    <Button Style="{StaticResource LoginButtonStyle}"
+                            Content="ВОЙТИ"
+                            Click="AuthorizationClick"
+                            Height="48"/>
+
+                </StackPanel>
+
+                <!-- Информация внизу -->
+                <StackPanel Grid.Row="2" 
+                            HorizontalAlignment="Center" 
+                            Margin="0,30,0,0">
+
+                    <Border Height="1" 
+                            Background="{StaticResource LightGray}"
+                            Width="200"
+                            Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Для входа используйте логин и пароль," 
+                               FontSize="12" 
+                               Foreground="{StaticResource NeutralGray}"
+                               HorizontalAlignment="Center"/>
+
+                    <TextBlock Text="выданные администратором системы" 
+                               FontSize="12" 
+                               Foreground="{StaticResource NeutralGray}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Фоновые элементы -->
+        <Border HorizontalAlignment="Center" 
+                VerticalAlignment="Bottom"
+                Margin="30"
+                Background="Transparent">
+            <TextBlock Text="КГАПОУ Пермский Авиационный техникум" 
+                       FontSize="12" 
+                       Foreground="{StaticResource White}"
+                       Opacity="0.7"/>
+        </Border>
+    </Grid>
+</Page>

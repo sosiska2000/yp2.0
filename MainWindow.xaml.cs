@@ -20,9 +20,9 @@ namespace EquipmentManagement.Client
         {
             frame.Navigate(page);
         }
-        //public void SetCurrentUser(Models.Users user)
-        //{
-        //    CurrentUser = user;
-        //}
+        public void SetCurrentUser(Models.Users user)
+        {
+            CurrentUser = user;
+        }
     }
 }
