@@ -1,0 +1,581 @@
+﻿<Page x:Class="EquipmentManagement.Client.Pages.HistoryAudiences.HistoryAudiences"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:EquipmentManagement.Client.Pages.HistoryAudiences"
+      mc:Ignorable="d" 
+      d:DesignHeight="700" d:DesignWidth="1200"
+      Title="История перемещения оборудования">
+
+    <Page.Resources>
+        <!-- Цветовая палитра по ТЗ -->
+        <SolidColorBrush x:Key="PrimaryBlue" Color="#0060AC"/>
+        <SolidColorBrush x:Key="AccentRed" Color="#E41613"/>
+        <SolidColorBrush x:Key="NeutralGray" Color="#9EA1A2"/>
+        <SolidColorBrush x:Key="LightGray" Color="#F5F5F5"/>
+        <SolidColorBrush x:Key="White" Color="White"/>
+        <SolidColorBrush x:Key="DarkGray" Color="#333333"/>
+        <SolidColorBrush x:Key="HoverBlue" Color="#E3F2FD"/>
+        <SolidColorBrush x:Key="CardBackground" Color="#FAFAFA"/>
+        <SolidColorBrush x:Key="TimelineColor" Color="#E0E0E0"/>
+        <SolidColorBrush x:Key="CurrentLocationColor" Color="#4CAF50"/>
+        <SolidColorBrush x:Key="PreviousLocationColor" Color="#2196F3"/>
+
+        <!-- Стиль основной кнопки -->
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryBlue}"/>
+            <Setter Property="Foreground" Value="{StaticResource White}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#0077CC"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#005A99"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль кнопки "Назад" -->
+        <Style x:Key="BackButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource White}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource NeutralGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{StaticResource DarkGray}"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+
+        <!-- Стиль для карточек истории -->
+        <Style x:Key="HistoryCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource White}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource NeutralGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+
+        <!-- Стиль для элементов таймлайна -->
+        <Style x:Key="TimelineItemStyle" TargetType="Border">
+            <Setter Property="Padding" Value="20"/>
+        </Style>
+
+        <!-- Стиль для текущей локации -->
+        <Style x:Key="CurrentLocationStyle" TargetType="Border">
+            <Setter Property="Background" Value="#E8F5E9"/>
+            <Setter Property="BorderBrush" Value="#4CAF50"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Стиль для предыдущих локаций -->
+        <Style x:Key="PreviousLocationStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource NeutralGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid Background="{StaticResource LightGray}" Margin="0,0,0,-299">
+        <!-- Верхняя панель -->
+        <Border Background="{StaticResource White}" 
+                Height="70" 
+                VerticalAlignment="Top"
+                BorderBrush="{StaticResource NeutralGray}"
+                BorderThickness="0,0,0,1">
+
+            <Grid Margin="20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Заголовок -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="📜" 
+                               FontSize="24" 
+                               VerticalAlignment="Center" 
+                               Margin="0,0,10,0"/>
+                    <TextBlock Text="ИСТОРИЯ ПЕРЕМЕЩЕНИЯ" 
+                               FontSize="20" 
+                               FontWeight="Bold"
+                               Foreground="{StaticResource PrimaryBlue}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="(1.1)" 
+                               FontSize="12" 
+                               Foreground="{StaticResource NeutralGray}"
+                               VerticalAlignment="Bottom"
+                               Margin="5,0,0,2"/>
+                </StackPanel>
+
+                <!-- Информация об оборудовании -->
+                <StackPanel Grid.Column="1" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+
+                    <Border Background="{StaticResource HoverBlue}"
+                            CornerRadius="6"
+                            Padding="12,8"
+                            Margin="0,0,10,0">
+                        <TextBlock Text="Ноутбук Dell T200" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource DarkGray}"/>
+                    </Border>
+
+                    <Border Background="{StaticResource HoverBlue}"
+                            CornerRadius="6"
+                            Padding="12,8">
+                        <TextBlock Text="Инв. №: 000012123124" 
+                                   FontSize="14" 
+                                   Foreground="{StaticResource DarkGray}"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- Кнопка "Назад" -->
+                <Button Grid.Column="2"
+                        Style="{StaticResource BackButtonStyle}"
+                        Click="Back"
+                        Content="← Назад"
+                        Width="100"
+                        Height="38"/>
+            </Grid>
+        </Border>
+
+        <!-- Основной контент -->
+        <ScrollViewer Margin="20,80,20,20">
+            <StackPanel x:Name="parent">
+
+                <!-- Карточка с таймлайном -->
+                <Border Style="{StaticResource HistoryCardStyle}">
+                    <Grid>
+                        <!-- Временная шкала слева -->
+                        <Border Width="4" 
+                                Background="{StaticResource TimelineColor}"
+                                HorizontalAlignment="Left"
+                                Margin="40,20"
+                                CornerRadius="2"/>
+
+                        <!-- Список перемещений -->
+                        <StackPanel Margin="60,20,20,20">
+
+                            <!-- Текущая локация -->
+                            <Border Style="{StaticResource TimelineItemStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Точка на таймлайне -->
+                                    <Border Grid.Column="0"
+                                            Width="20" 
+                                            Height="20" 
+                                            Background="{StaticResource CurrentLocationColor}"
+                                            CornerRadius="10"
+                                            Margin="0,0,20,0">
+                                        <TextBlock Text="📍" 
+                                                   FontSize="10" 
+                                                   HorizontalAlignment="Center" 
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Информация о текущей локации -->
+                                    <Border Grid.Column="1" Style="{StaticResource CurrentLocationStyle}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <StackPanel Grid.Row="0" 
+                                                        Orientation="Horizontal" 
+                                                        Margin="0,0,0,8">
+                                                <TextBlock Text="Текущее местоположение" 
+                                                           FontSize="14" 
+                                                           FontWeight="Bold"
+                                                           Foreground="{StaticResource CurrentLocationColor}"
+                                                           Margin="0,0,10,0"/>
+
+                                                <TextBlock Text="•" 
+                                                           Foreground="{StaticResource NeutralGray}"
+                                                           Margin="0,0,10,0"/>
+
+                                                <TextBlock Text="С 15.09.2023" 
+                                                           FontSize="13" 
+                                                           Foreground="{StaticResource DarkGray}"/>
+                                            </StackPanel>
+
+                                            <TextBlock Grid.Row="1" 
+                                                       Text="Кабинет 301 (Лаборатория информационных технологий)" 
+                                                       FontSize="16" 
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource DarkGray}"
+                                                       Margin="0,0,0,6"/>
+
+                                            <StackPanel Grid.Row="2" 
+                                                        Orientation="Horizontal">
+                                                <TextBlock Text="Ответственный: " 
+                                                           FontSize="13" 
+                                                           Foreground="{StaticResource NeutralGray}"
+                                                           Margin="0,0,5,0"/>
+                                                <TextBlock Text="Иванов И.И." 
+                                                           FontSize="13" 
+                                                           FontWeight="Medium"
+                                                           Foreground="{StaticResource DarkGray}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <!-- Предыдущие локации -->
+                            <Border Style="{StaticResource TimelineItemStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0"
+                                            Width="20" 
+                                            Height="20" 
+                                            Background="{StaticResource PreviousLocationColor}"
+                                            CornerRadius="10"
+                                            Margin="0,0,20,0"/>
+
+                                    <Border Grid.Column="1" Style="{StaticResource PreviousLocationStyle}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <StackPanel Grid.Row="0" 
+                                                        Orientation="Horizontal" 
+                                                        Margin="0,0,0,8">
+                                                <TextBlock Text="01.06.2023 - 14.09.2023" 
+                                                           FontSize="13" 
+                                                           Foreground="{StaticResource DarkGray}"/>
+
+                                                <TextBlock Text="•" 
+                                                           Foreground="{StaticResource NeutralGray}"
+                                                           Margin="10,0,10,0"/>
+
+                                                <TextBlock Text="3 месяца 14 дней" 
+                                                           FontSize="13" 
+                                                           Foreground="{StaticResource NeutralGray}"/>
+                                            </StackPanel>
+
+                                            <TextBlock Grid.Row="1" 
+                                                       Text="Кабинет 205 (Компьютерный класс)" 
+                                                       FontSize="15" 
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource DarkGray}"
+                                                       Margin="0,0,0,6"/>
+
+                                            <TextBlock Grid.Row="2" 
+                                                       Text="Перемещено в связи с ремонтом кабинета 205" 
+                                                       FontSize="13" 
+                                                       Foreground="{StaticResource NeutralGray}"
+                                                       FontStyle="Italic"/>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <!-- Еще одна предыдущая локация -->
+                            <Border Style="{StaticResource TimelineItemStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0"
+                                            Width="20" 
+                                            Height="20" 
+                                            Background="{StaticResource PreviousLocationColor}"
+                                            CornerRadius="10"
+                                            Margin="0,0,20,0"/>
+
+                                    <Border Grid.Column="1" Style="{StaticResource PreviousLocationStyle}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <StackPanel Grid.Row="0" 
+                                                        Orientation="Horizontal" 
+                                                        Margin="0,0,0,8">
+                                                <TextBlock Text="15.01.2023 - 31.05.2023" 
+                                                           FontSize="13" 
+                                                           Foreground="{StaticResource DarkGray}"/>
+
+                                                <TextBlock Text="•" 
+                                                           Foreground="{StaticResource NeutralGray}"
+                                                           Margin="10,0,10,0"/>
+
+                                                <TextBlock Text="4 месяца 17 дней" 
+                                                           FontSize="13" 
+                                                           Foreground="{StaticResource NeutralGray}"/>
+                                            </StackPanel>
+
+                                            <TextBlock Grid.Row="1" 
+                                                       Text="Склад №2 (Основное хранение)" 
+                                                       FontSize="15" 
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource DarkGray}"
+                                                       Margin="0,0,0,6"/>
+
+                                            <StackPanel Grid.Row="2" 
+                                                        Orientation="Horizontal">
+                                                <TextBlock Text="Ответственный: " 
+                                                           FontSize="13" 
+                                                           Foreground="{StaticResource NeutralGray}"
+                                                           Margin="0,0,5,0"/>
+                                                <TextBlock Text=" Петров П.П."  
+                                                           FontSize="13" 
+                                                           FontWeight="Medium"
+                                                           Foreground="{StaticResource DarkGray}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <!-- Самая первая локация -->
+                            <Border Style="{StaticResource TimelineItemStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0"
+                                            Width="20" 
+                                            Height="20" 
+                                            Background="{StaticResource PreviousLocationColor}"
+                                            CornerRadius="10"
+                                            Margin="0,0,20,0"/>
+
+                                    <Border Grid.Column="1" Style="{StaticResource PreviousLocationStyle}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <StackPanel Grid.Row="0" 
+                                                        Orientation="Horizontal" 
+                                                        Margin="0,0,0,8">
+                                                <TextBlock Text="21.08.2022 - 14.01.2023" 
+                                                           FontSize="13" 
+                                                           Foreground="{StaticResource DarkGray}"/>
+
+                                                <TextBlock Text="•" 
+                                                           Foreground="{StaticResource NeutralGray}"
+                                                           Margin="10,0,10,0"/>
+
+                                                <TextBlock Text="4 месяца 24 дня" 
+                                                           FontSize="13" 
+                                                           Foreground="{StaticResource NeutralGray}"/>
+                                            </StackPanel>
+
+                                            <TextBlock Grid.Row="1" 
+                                                       Text="Первоначальное размещение" 
+                                                       FontSize="15" 
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource DarkGray}"
+                                                       Margin="0,0,0,6"/>
+
+                                            <TextBlock Grid.Row="2" 
+                                                       Text="Оборудование получено по акту приема-передачи" 
+                                                       FontSize="13" 
+                                                       Foreground="{StaticResource NeutralGray}"
+                                                       FontStyle="Italic"/>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Статистика перемещений -->
+                <Border Style="{StaticResource HistoryCardStyle}">
+                    <Grid Margin="20">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" 
+                                   Text="📊 Статистика перемещений" 
+                                   FontSize="16" 
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource DarkGray}"
+                                   Margin="0,0,0,16"/>
+
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Всего перемещений -->
+                            <Border Grid.Column="0" 
+                                    Background="{StaticResource CardBackground}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    Margin="0,0,10,0">
+                                <StackPanel>
+                                    <TextBlock Text="4" 
+                                               FontSize="28" 
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource PrimaryBlue}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="всего перемещений" 
+                                               FontSize="13" 
+                                               Foreground="{StaticResource NeutralGray}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Время на текущем месте -->
+                            <Border Grid.Column="1" 
+                                    Background="{StaticResource CardBackground}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    Margin="5,0,5,0">
+                                <StackPanel>
+                                    <TextBlock Text="2 мес" 
+                                               FontSize="28" 
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource CurrentLocationColor}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="на текущем месте" 
+                                               FontSize="13" 
+                                               Foreground="{StaticResource NeutralGray}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Среднее время на месте -->
+                            <Border Grid.Column="2" 
+                                    Background="{StaticResource CardBackground}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    Margin="5,0,5,0">
+                                <StackPanel>
+                                    <TextBlock Text="3.8 мес" 
+                                               FontSize="28" 
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource PreviousLocationColor}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="среднее на месте" 
+                                               FontSize="13" 
+                                               Foreground="{StaticResource NeutralGray}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Всего аудиторий -->
+                            <Border Grid.Column="3" 
+                                    Background="{StaticResource CardBackground}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    Margin="10,0,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="3" 
+                                               FontSize="28" 
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource AccentRed}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="аудиторий всего" 
+                                               FontSize="13" 
+                                               Foreground="{StaticResource NeutralGray}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Сообщение при отсутствии истории -->
+        <Border x:Name="emptyMessage"
+                Visibility="Collapsed"
+                Background="{StaticResource White}"
+                CornerRadius="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="500"
+                Height="250">
+
+            <StackPanel HorizontalAlignment="Center" 
+                        VerticalAlignment="Center"
+                        Margin="20">
+
+                <TextBlock Text="📜" 
+                           FontSize="40" 
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,15"/>
+
+                <TextBlock Text="История перемещений отсутствует" 
+                           FontSize="18" 
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource DarkGray}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,8"/>
+
+                <TextBlock Text="Оборудование еще не перемещалось между аудиториями." 
+                           FontSize="13" 
+                           Foreground="{StaticResource NeutralGray}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           Margin="0,0,0,8"/>
+
+                <TextBlock Text="История будет автоматически обновляться при изменении аудитории оборудования." 
+                           FontSize="12" 
+                           Foreground="{StaticResource NeutralGray}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           FontStyle="Italic"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>
