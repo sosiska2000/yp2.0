@@ -1,17 +1,39 @@
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi;
-
 using RestAPI.Connect;
+using RestAPI.Services;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавляем MVC
 builder.Services.AddControllers();
 
-// Добавляем DbContext
 builder.Services.AddDbContext<ApplicationDbContext>();
 
-// Добавляем Swagger
+builder.Services.AddScoped<OborudovanieService>();
+builder.Services.AddScoped<PolzovateliService>();
+builder.Services.AddScoped<AuditoriiService>();
+builder.Services.AddScoped<NapravleniyaService>();
+builder.Services.AddScoped<StatusyService>();
+builder.Services.AddScoped<TipyOborudovaniaService>();
+builder.Services.AddScoped<VidyModeleiService>();
+builder.Services.AddScoped<RazrabotchikiService>();
+builder.Services.AddScoped<ProgrammyService>();
+builder.Services.AddScoped<SetevyeNastroikiService>();
+builder.Services.AddScoped<TipyRaskhodnykhMaterialovService>();
+builder.Services.AddScoped<RaskhodnyeMaterialyService>();
+builder.Services.AddScoped<KharakteristikiMaterialovService>();
+builder.Services.AddScoped<InventarizatsiaService>();
+builder.Services.AddScoped<InventarizatsiaDetaliService>();
+builder.Services.AddScoped<LogiOshibokService>();
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; 
+    options.MemoryBufferThreshold = 1024 * 1024;
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -22,7 +44,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "API для управления инвентаризацией в учебном заведении"
     });
 
-    // Включаем XML комментарии
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 
@@ -32,21 +53,61 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
+
+var logsDir = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+if (!Directory.Exists(logsDir))
+{
+    Directory.CreateDirectory(logsDir);
+}
+
+
 var app = builder.Build();
 
-// Настраиваем Swagger только в Development
+
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Inventory API v1");
-        c.RoutePrefix = "swagger"; // Теперь Swagger будет на /swagger
+        c.RoutePrefix = "swagger";
     });
+}
+else
+{
+    app.UseExceptionHandler("/error");
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 app.UseAuthorization();
+
 app.MapControllers();
+
+
+app.MapGet("/", () => Results.Redirect("/swagger"));
+app.MapGet("/health", () => "API работает");
+
+
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+ 
+        using var scope = app.Services.CreateScope();
+        var logService = scope.ServiceProvider.GetRequiredService<LogiOshibokService>();
+        logService.LogError("Middleware", ex.Message);
+
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsync("Внутренняя ошибка сервера");
+    }
+});
 
 app.Run();

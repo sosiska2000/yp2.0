@@ -60,8 +60,8 @@ namespace RestAPI.Services
 
         public bool HasConnections(int id)
         {
-            return _context.OborudovanieRaskhodnyeMaterialy.Any(orm => orm.RaskhodnyMaterialId == id) ||
-                   _context.KharakteristikiMaterialov.Any(k => k.RaskhodnyMaterialId == id);
+           
+            return _context.KharakteristikiMaterialov.Any(k => k.RaskhodnyMaterialId == id);
         }
     }
 }

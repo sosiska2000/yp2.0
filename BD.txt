@@ -1,0 +1,327 @@
+-- 1. Удаляем старую БД если есть
+DROP DATABASE IF EXISTS inventory_system;
+
+-- 2. Создаем новую БД
+CREATE DATABASE inventory_system;
+USE inventory_system;
+
+-- 3. Пользователи
+CREATE TABLE Polzovateli (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Login VARCHAR(50) UNIQUE NOT NULL,
+    Parol VARCHAR(255) NOT NULL,
+    Rol ENUM('admin', 'prepodavatel', 'sotrudnik') DEFAULT 'sotrudnik',
+    Email VARCHAR(100),
+    Familiia VARCHAR(100) NOT NULL,
+    Imia VARCHAR(100) NOT NULL,
+    Otchestvo VARCHAR(100),
+    Telefon VARCHAR(20),
+    Adres TEXT
+);
+
+-- 4. Направления
+CREATE TABLE Napravleniya (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nazvanie VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- 5. Статусы
+CREATE TABLE Statusy (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nazvanie VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- 6. Типы оборудования
+CREATE TABLE TipyOborudovania (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nazvanie VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- 7. Виды моделей
+CREATE TABLE VidyModelei (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nazvanie VARCHAR(100) NOT NULL,
+    TipOborudovaniaId INT NOT NULL,
+    FOREIGN KEY (TipOborudovaniaId) REFERENCES TipyOborudovania(Id)
+);
+
+-- 8. Аудитории
+CREATE TABLE Auditorii (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nazvanie VARCHAR(100) NOT NULL,
+    SokrashennoeNazvanie VARCHAR(50),
+    OtvetstvennyiPolzovatelId INT,
+    FOREIGN KEY (OtvetstvennyiPolzovatelId) REFERENCES Polzovateli(Id)
+);
+
+-- 9. Разработчики ПО
+CREATE TABLE Razrabotchiki (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nazvanie VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- 10. Программы
+CREATE TABLE Programmy (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nazvanie VARCHAR(100) NOT NULL,
+    RazrabotchikId INT NOT NULL,
+    Versia VARCHAR(50),
+    FOREIGN KEY (RazrabotchikId) REFERENCES Razrabotchiki(Id)
+);
+
+-- 11. Оборудование (ГЛАВНАЯ таблица)
+CREATE TABLE Oborudovanie (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nazvanie VARCHAR(200) NOT NULL,
+    Fotografia VARCHAR(500),
+    InventarnyiNomer VARCHAR(50) UNIQUE NOT NULL,
+    AuditoriaId INT,
+    OtvetstvennyiPolzovatelId INT,
+    VremennoOtvetstvennyiPolzovatelId INT,
+    Stoimost DECIMAL(15,2) NOT NULL,
+    NapravlenieId INT,
+    StatusId INT NOT NULL,
+    TipOborudovaniaId INT NOT NULL,
+    VidModeliId INT,
+    Kommentarii TEXT,
+    FOREIGN KEY (AuditoriaId) REFERENCES Auditorii(Id),
+    FOREIGN KEY (OtvetstvennyiPolzovatelId) REFERENCES Polzovateli(Id),
+    FOREIGN KEY (VremennoOtvetstvennyiPolzovatelId) REFERENCES Polzovateli(Id),
+    FOREIGN KEY (NapravlenieId) REFERENCES Napravleniya(Id),
+    FOREIGN KEY (StatusId) REFERENCES Statusy(Id),
+    FOREIGN KEY (TipOborudovaniaId) REFERENCES TipyOborudovania(Id),
+    FOREIGN KEY (VidModeliId) REFERENCES VidyModelei(Id)
+);
+
+-- 12. Сетевые настройки
+CREATE TABLE SetevyeNastroiki (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    OborudovanieId INT NOT NULL,
+    IpAdres VARCHAR(15) UNIQUE NOT NULL,
+    MaskaPodseti VARCHAR(15) NOT NULL,
+    GlavnyiShliuz VARCHAR(15),
+    Dns1 VARCHAR(15),
+    Dns2 VARCHAR(15),
+    FOREIGN KEY (OborudovanieId) REFERENCES Oborudovanie(Id)
+);
+
+-- 13. Типы расходных материалов
+CREATE TABLE TipyRaskhodnykhMaterialov (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nazvanie VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- 14. Расходные материалы
+CREATE TABLE RaskhodnyeMaterialy (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nazvanie VARCHAR(200) NOT NULL,
+    Opisanie TEXT,
+    DataPostuplenia DATE NOT NULL,
+    Izobrazhenie VARCHAR(500),
+    Kolichestvo INT NOT NULL DEFAULT 0,
+    OtvetstvennyiPolzovatelId INT,
+    TipRaskhodnogoMaterialaId INT NOT NULL,
+    FOREIGN KEY (OtvetstvennyiPolzovatelId) REFERENCES Polzovateli(Id),
+    FOREIGN KEY (TipRaskhodnogoMaterialaId) REFERENCES TipyRaskhodnykhMaterialov(Id)
+);
+
+-- 15. Характеристики материалов
+CREATE TABLE KharakteristikiMaterialov (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    RaskhodnyMaterialId INT NOT NULL,
+    NazvanieKharakteristiki VARCHAR(100) NOT NULL,
+    Znachenie VARCHAR(500) NOT NULL,
+    FOREIGN KEY (RaskhodnyMaterialId) REFERENCES RaskhodnyeMaterialy(Id)
+);
+
+-- 16. Инвентаризации
+CREATE TABLE Inventarizatsii (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nazvanie VARCHAR(200) NOT NULL,
+    DataNachala DATETIME NOT NULL,
+    DataOkonchania DATETIME,
+    SozdalPolzovatelId INT NOT NULL,
+    FOREIGN KEY (SozdalPolzovatelId) REFERENCES Polzovateli(Id)
+);
+
+-- 17. Детали инвентаризации
+CREATE TABLE InventarizatsiaDetali (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    InventarizatsiaId INT NOT NULL,
+    OborudovanieId INT NOT NULL,
+    Proinventarizirovano BOOLEAN DEFAULT FALSE,
+    ProinventarizirovalPolzovatelId INT,
+    DataProverki DATETIME,
+    Kommentarii TEXT,
+    FOREIGN KEY (InventarizatsiaId) REFERENCES Inventarizatsii(Id),
+    FOREIGN KEY (OborudovanieId) REFERENCES Oborudovanie(Id),
+    FOREIGN KEY (ProinventarizirovalPolzovatelId) REFERENCES Polzovateli(Id)
+);
+
+-- 18. Логи ошибок
+CREATE TABLE LogiOshibok (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    DataVremia TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PolzovatelId INT,
+    Module VARCHAR(100) NOT NULL,
+    Soobshchenie TEXT NOT NULL,
+    FOREIGN KEY (PolzovatelId) REFERENCES Polzovateli(Id)
+);
+
+-- 19. Связь Оборудование-Программы
+CREATE TABLE OborudovanieProgrammy (
+    OborudovanieId INT NOT NULL,
+    ProgrammaId INT NOT NULL,
+    PRIMARY KEY (OborudovanieId, ProgrammaId),
+    FOREIGN KEY (OborudovanieId) REFERENCES Oborudovanie(Id),
+    FOREIGN KEY (ProgrammaId) REFERENCES Programmy(Id)
+);
+
+-- 20. Связь Оборудование-Расходные материалы
+CREATE TABLE OborudovanieRaskhodnyeMaterialy (
+    OborudovanieId INT NOT NULL,
+    RaskhodnyMaterialId INT NOT NULL,
+    Kolichestvo INT DEFAULT 1,
+    PRIMARY KEY (OborudovanieId, RaskhodnyMaterialId),
+    FOREIGN KEY (OborudovanieId) REFERENCES Oborudovanie(Id),
+    FOREIGN KEY (RaskhodnyMaterialId) REFERENCES RaskhodnyeMaterialy(Id)
+);
+
+-- ================================================
+-- ЗАПОЛНЕНИЕ ТЕСТОВЫМИ ДАННЫМИ
+-- ================================================
+
+-- 1. Пользователи
+INSERT INTO Polzovateli (Login, Parol, Rol, Email, Familiia, Imia, Otchestvo, Telefon, Adres) VALUES
+('admin', 'admin', 'admin', 'admin@college.ru', 'Админ', 'Системный', NULL, NULL, NULL),
+('ivanov_ii', 'ivanov123', 'sotrudnik', 'ivanov@college.ru', 'Иванов', 'Иван', 'Иванович', '+7 (912) 345-67-89', 'г. Пермь, ул. Ленина, д. 1'),
+('petrova_ss', 'petrova456', 'prepodavatel', 'petrova@college.ru', 'Петрова', 'Светлана', 'Сергеевна', '+7 (912) 456-78-90', 'г. Пермь, ул. Пушкина, д. 25');
+
+-- 2. Направления
+INSERT INTO Napravleniya (Nazvanie) VALUES
+('Мехатроника'),
+('WSR2022'),
+('Информационные системы');
+
+-- 3. Статусы
+INSERT INTO Statusy (Nazvanie) VALUES
+('Используется'),
+('На ремонте'),
+('Сломано'),
+('На выдаче');
+
+-- 4. Типы оборудования
+INSERT INTO TipyOborudovania (Nazvanie) VALUES
+('Монитор'),
+('Системный блок'),
+('Принтер'),
+('Ноутбук');
+
+-- 5. Виды моделей
+INSERT INTO VidyModelei (Nazvanie, TipOborudovaniaId) VALUES
+('Dell UltraSharp U2419H', 1),
+('HP ProDesk 400 G6', 2),
+('Lenovo ThinkPad T14', 4);
+
+-- 6. Аудитории
+INSERT INTO Auditorii (Nazvanie, SokrashennoeNazvanie, OtvetstvennyiPolzovatelId) VALUES
+('Кабинет информатики №301', 'Ауд. 301', 2),
+('Лаборатория робототехники', 'Лаб. робот.', 3),
+('Серверная комната', 'Серверная', 1);
+
+-- 7. Разработчики ПО
+INSERT INTO Razrabotchiki (Nazvanie) VALUES
+('Microsoft'),
+('Adobe'),
+('JetBrains');
+
+-- 8. Программы
+INSERT INTO Programmy (Nazvanie, RazrabotchikId, Versia) VALUES
+('Microsoft Office 365', 1, '2024'),
+('Adobe Photoshop', 2, 'CC 2024'),
+('IntelliJ IDEA', 3, '2024.1');
+
+-- 9. Оборудование
+INSERT INTO Oborudovanie (Nazvanie, InventarnyiNomer, Stoimost, StatusId, TipOborudovaniaId, AuditoriaId, OtvetstvennyiPolzovatelId) VALUES
+('Компьютер преподавателя', 'INV-2024-001', 75000.00, 1, 2, 1, 2),
+('Монитор 24 дюйма', 'INV-2024-002', 18500.00, 1, 1, 1, 2),
+('Ноутбук для занятий', 'INV-2024-003', 65000.00, 1, 4, 2, 3);
+
+-- 10. Сетевые настройки
+INSERT INTO SetevyeNastroiki (OborudovanieId, IpAdres, MaskaPodseti, GlavnyiShliuz, Dns1, Dns2) VALUES
+(1, '192.168.1.100', '255.255.255.0', '192.168.1.1', '8.8.8.8', '8.8.4.4'),
+(2, '192.168.1.101', '255.255.255.0', '192.168.1.1', '8.8.8.8', '8.8.4.4');
+
+-- 11. Типы расходных материалов
+INSERT INTO TipyRaskhodnykhMaterialov (Nazvanie) VALUES
+('Картридж'),
+('Компьютерная мышь'),
+('Клавиатура');
+
+-- 12. Расходные материалы
+INSERT INTO RaskhodnyeMaterialy (Nazvanie, DataPostuplenia, Kolichestvo, TipRaskhodnogoMaterialaId, OtvetstvennyiPolzovatelId) VALUES
+('Картридж HP 126A', '2024-01-15', 5, 1, 1),
+('Мышь Logitech M185', '2024-02-20', 10, 2, 2),
+('Клавиатура Defender', '2024-03-10', 8, 3, 3);
+
+-- 13. Характеристики материалов
+INSERT INTO KharakteristikiMaterialov (RaskhodnyMaterialId, NazvanieKharakteristiki, Znachenie) VALUES
+(1, 'Цвет', 'Черный'),
+(1, 'Совместимость', 'HP LaserJet 126, 127'),
+(2, 'Тип подключения', 'Беспроводная');
+
+-- 14. Инвентаризации
+INSERT INTO Inventarizatsii (Nazvanie, DataNachala, DataOkonchania, SozdalPolzovatelId) VALUES
+('Ежеквартальная инвентаризация Q1 2024', '2024-03-01 09:00:00', '2024-03-05 18:00:00', 1),
+('Проверка компьютерного класса', '2024-03-15 10:00:00', NULL, 2),
+('Инвентаризация перед летом', '2024-05-20 09:00:00', '2024-05-25 17:00:00', 3);
+
+-- 15. Детали инвентаризации
+INSERT INTO InventarizatsiaDetali (InventarizatsiaId, OborudovanieId, Proinventarizirovano, ProinventarizirovalPolzovatelId, DataProverki, Kommentarii) VALUES
+(1, 1, TRUE, 1, '2024-03-01 10:30:00', 'Оборудование в отличном состоянии'),
+(1, 2, TRUE, 2, '2024-03-01 11:15:00', 'Монитор работает исправно'),
+(1, 3, FALSE, NULL, NULL, 'Ожидает проверки');
+
+-- 16. Логи ошибок
+INSERT INTO LogiOshibok (PolzovatelId, Module, Soobshchenie) VALUES
+(1, 'OborudovanieController', 'Ошибка при создании оборудования'),
+(2, 'AuthController', 'Неудачная попытка входа'),
+(3, 'ImportService', 'Ошибка чтения CSV файла');
+
+-- 17. Связь Оборудование-Программы
+INSERT INTO OborudovanieProgrammy (OborudovanieId, ProgrammaId) VALUES
+(1, 1),
+(1, 2),
+(1, 3);
+
+-- 18. Связь Оборудование-Расходные материалы
+INSERT INTO OborudovanieRaskhodnyeMaterialy (OborudovanieId, RaskhodnyMaterialId, Kolichestvo) VALUES
+(1, 2, 2),
+(1, 3, 1),
+(2, 2, 1);
+
+-- ================================================
+-- ПРОВЕРКА СОЗДАННЫХ ТАБЛИЦ
+-- ================================================
+
+SELECT 'Статистика базы данных:' as Информация;
+SELECT 
+    TABLE_NAME as Таблица,
+    TABLE_ROWS as 'Кол-во записей'
+FROM INFORMATION_SCHEMA.TABLES 
+WHERE TABLE_SCHEMA = 'inventory_system'
+ORDER BY TABLE_NAME;
+
+SELECT 'Пример оборудования:' as Информация;
+SELECT 
+    o.Nazvanie,
+    o.InventarnyiNomer,
+    o.Stoimost,
+    s.Nazvanie as Status,
+    t.Nazvanie as TipOborudovania
+FROM Oborudovanie o
+JOIN Statusy s ON o.StatusId = s.Id
+JOIN TipyOborudovania t ON o.TipOborudovaniaId = t.Id;
+
+SELECT 'Пример пользователей:' as Информация;
+SELECT Login, Rol, Familiia, Imia, Email FROM Polzovateli;

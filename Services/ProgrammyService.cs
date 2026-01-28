@@ -1,4 +1,5 @@
-﻿using RestAPI.Connect;
+﻿using Microsoft.EntityFrameworkCore;
+using RestAPI.Connect;
 using RestAPI.Models;
 using System.Linq;
 
@@ -59,7 +60,8 @@ namespace RestAPI.Services
 
         public bool HasConnections(int id)
         {
-            return _context.OborudovanieProgrammy.Any(op => op.ProgrammaId == id);
+ 
+            return false;
         }
     }
 }

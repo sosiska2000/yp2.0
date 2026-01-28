@@ -61,7 +61,7 @@ namespace RestAPI.Services
 
         public bool HasConnections(int id)
         {
-            return _context.InventarizatsiaDetali.Any(id => id.InventarizatsiaId == id);
+            return _context.InventarizatsiaDetali.Any(detal => detal.InventarizatsiaId == id);
         }
 
         public void StartInventarizatsia(int id, int userId)
