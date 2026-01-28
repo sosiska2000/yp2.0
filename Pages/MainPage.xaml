@@ -1,0 +1,207 @@
+﻿<Page x:Class="EquipmentManagement.Client.Pages.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:EquipmentManagement.Client.Pages"
+      mc:Ignorable="d" d:DesignWidth="1000"
+      Title="Главное меню" Height="810">
+
+    <Page.Resources>
+        <!-- Цветовая палитра -->
+        <SolidColorBrush x:Key="PrimaryColor" Color="#0060AC"/>
+        <SolidColorBrush x:Key="SecondaryColor" Color="#E41613"/>
+        <SolidColorBrush x:Key="LightGray" Color="#F5F5F5"/>
+        <SolidColorBrush x:Key="MediumGray" Color="#E0E0E0"/>
+        <SolidColorBrush x:Key="DarkGray" Color="#616161"/>
+        <SolidColorBrush x:Key="White" Color="White"/>
+        <SolidColorBrush x:Key="HoverColor" Color="#E3F2FD"/>
+        <SolidColorBrush x:Key="CardBackground" Color="#FAFAFA"/>
+
+        <!-- Стили заголовков -->
+        <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource DarkGray}"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <!-- Стиль кнопок меню -->
+        <Style x:Key="MenuButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{StaticResource MediumGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{StaticResource DarkGray}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter x:Name="contentPresenter"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          Margin="{TemplateBinding Padding}"
+                                          RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource HoverColor}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryColor}"/>
+                                <Setter Property="Foreground" Value="{StaticResource PrimaryColor}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль карточек -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource MediumGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="10"/>
+        </Style>
+
+        <!-- Стиль кнопки выхода -->
+        <Style x:Key="ExitButtonStyle" TargetType="Button" BasedOn="{StaticResource MenuButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource White}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource SecondaryColor}"/>
+            <Setter Property="Foreground" Value="{StaticResource SecondaryColor}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="20,10"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid Background="{StaticResource LightGray}">
+        <!-- Верхняя панель -->
+        <Border Background="{StaticResource White}" 
+                Height="60" 
+                VerticalAlignment="Top"
+                BorderBrush="{StaticResource MediumGray}"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Логотип/заголовок -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
+                    <TextBlock Text="🏢" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="Управление оборудованием" 
+                               FontSize="18" 
+                               FontWeight="Bold" 
+                               Foreground="{StaticResource PrimaryColor}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Кнопка выхода -->
+                <Button Grid.Column="2" 
+                        Click="Exit" 
+                        Style="{StaticResource ExitButtonStyle}"
+                        Content="Выход" 
+                        VerticalAlignment="Center"
+                        Margin="0,0,20,0"
+                        Width="120"/>
+            </Grid>
+        </Border>
+
+        <!-- Основной контент -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,60,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Левая колонка -->
+                <StackPanel Grid.Column="0" Margin="20,20,10,20">
+
+                    <!-- Раздел: Оборудование -->
+                    <Border Style="{StaticResource CardStyle}" Margin="0,10,0,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="📦 ОБОРУДОВАНИЕ"/>
+                            <Button Click="OpenEquip" Style="{StaticResource MenuButtonStyle}" Content="Основное оборудование"/>
+                            <Button Click="OpenEqType" Style="{StaticResource MenuButtonStyle}" Content="Типы оборудования"/>
+                            <Button Click="OpenInvent" Style="{StaticResource MenuButtonStyle}" Content="Инвентаризация"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Раздел: Расходные материалы -->
+                    <Border Style="{StaticResource CardStyle}" Margin="0,10,0,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="📄 РАСХОДНЫЕ МАТЕРИАЛЫ"/>
+                            <StackPanel Margin="10,0,0,0">
+                                <Button Click="OpenRMat" Style="{StaticResource MenuButtonStyle}" Content="Материалы"/>
+                                <Button Click="OpenCharRMat" Style="{StaticResource MenuButtonStyle}" Content="Характеристики"/>
+                                <Button Click="OpenTypeChar" Style="{StaticResource MenuButtonStyle}" Content="Типы характеристик"/>
+                                <Button Click="OpenValueChar" Style="{StaticResource MenuButtonStyle}" Content="Значения характеристик"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Раздел: Прочее -->
+                    <Border Style="{StaticResource CardStyle}" Margin="0,10,0,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="⚙️ ПРОЧЕЕ"/>
+                            <Button Click="OpenModType" Style="{StaticResource MenuButtonStyle}" Content="Виды моделей"/>
+                            <Button Click="OpenSettings" Style="{StaticResource MenuButtonStyle}" Content="Сетевые настройки"/>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- Правая колонка -->
+                <StackPanel Grid.Column="1" Margin="10,20,20,20">
+
+                    <!-- Раздел: Организация -->
+                    <Border Style="{StaticResource CardStyle}" Margin="0,10,0,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="🏛️ ОРГАНИЗАЦИЯ"/>
+                            <Button Click="OpenAudien" Style="{StaticResource MenuButtonStyle}" Content="Аудитории"/>
+                            <Button Click="OpenDirection" Style="{StaticResource MenuButtonStyle}" Content="Направления"/>
+                            <Button Click="OpenStatus" Style="{StaticResource MenuButtonStyle}" Content="Статусы"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Раздел: Программы -->
+                    <Border Style="{StaticResource CardStyle}" Margin="0,10,0,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="💻 ПРОГРАММЫ"/>
+                            <Button Click="OpenProgr" Style="{StaticResource MenuButtonStyle}" Content="Программное обеспечение"/>
+                            <Button Click="OpenDevel" Style="{StaticResource MenuButtonStyle}" Content="Разработчики"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Раздел: Администрирование -->
+                    <Border Style="{StaticResource CardStyle}" Margin="0,10,0,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="🔐 АДМИНИСТРИРОВАНИЕ"/>
+                            <Button x:Name="users" 
+                                    Click="OpenUsers" 
+                                    Style="{StaticResource MenuButtonStyle}" 
+                                    Content="Пользователи"
+                                    Visibility="Hidden"/>
+                            <Button Style="{StaticResource MenuButtonStyle}" Content="Роли и доступы" IsEnabled="False"/>
+                            <Button Style="{StaticResource MenuButtonStyle}" Content="Логирование" IsEnabled="False"/>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Page>
