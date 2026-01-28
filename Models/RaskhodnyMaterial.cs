@@ -12,6 +12,8 @@ namespace RestAPI.Models
         public int Kolichestvo { get; set; }
         public int? OtvetstvennyiPolzovatelId { get; set; }
         public int TipRaskhodnogoMaterialaId { get; set; }
+        public int? VremennoOtvetstvennyiPolzovatelId { get; set; }
+        public Polzovatel? VremennoOtvetstvennyiPolzovatel { get; set; }
 
         public Polzovatel? OtvetstvennyiPolzovatel { get; set; }
         public TipRaskhodnogoMateriala? TipRaskhodnogoMateriala { get; set; }

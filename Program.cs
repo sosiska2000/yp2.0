@@ -26,6 +26,7 @@ builder.Services.AddScoped<KharakteristikiMaterialovService>();
 builder.Services.AddScoped<InventarizatsiaService>();
 builder.Services.AddScoped<InventarizatsiaDetaliService>();
 builder.Services.AddScoped<LogiOshibokService>();
+builder.Services.AddScoped<DokumentyService>();
 
 builder.Services.Configure<FormOptions>(options =>
 {
@@ -87,9 +88,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-
-app.MapGet("/", () => Results.Redirect("/swagger"));
-app.MapGet("/health", () => "API работает");
 
 
 app.Use(async (context, next) =>

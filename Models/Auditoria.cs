@@ -7,4 +7,6 @@ public class Auditoria
     public string? SokrashennoeNazvanie { get; set; }
     public int? OtvetstvennyiPolzovatelId { get; set; }
     public Polzovatel? OtvetstvennyiPolzovatel { get; set; }
+    public int? VremennoOtvetstvennyiPolzovatelId { get; set; }
+    public Polzovatel? VremennoOtvetstvennyiPolzovatel { get; set; }
 }

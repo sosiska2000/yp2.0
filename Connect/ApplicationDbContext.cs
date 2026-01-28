@@ -5,7 +5,9 @@ namespace RestAPI.Connect
 {
     public class ApplicationDbContext : DbContext
     {
-
+        public DbSet<AktPriemaPeredachi> AktyPriemaPeredachi { get; set; }
+        public DbSet<AktOborudovanie> AktyOborudovanie { get; set; }
+        public DbSet<AktMaterialy> AktyMaterialy { get; set; }
         public DbSet<Polzovatel> Polzovateli { get; set; }
         public DbSet<Napravlenie> Napravleniya { get; set; }
         public DbSet<Status> Statusy { get; set; }
