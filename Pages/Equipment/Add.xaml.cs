@@ -159,10 +159,10 @@ namespace EquipmentManagement.Client.Pages.Equipment
 
                 if (equipment.Id == 0)
                 {
-                    MainEquipment.EquipmentContext.Equipment.Add(equipment);
+                    Equipment.EquipmentContext.Equipment.Add(equipment);
                 }
 
-                MainEquipment.EquipmentContext.SaveChanges();
+                Equipment.EquipmentContext.SaveChanges();
 
                 // Проверяем, изменился ли IdTimeResponUser
                 if (oldIdResponUser != equipment.IdResponUser)

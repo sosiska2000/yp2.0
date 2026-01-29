@@ -6,7 +6,7 @@ namespace EquipmentManagement.Client
     public partial class MainWindow : Window
     {
         public static MainWindow init;
-        //public static Pages.Menu menu;
+        public static Pages.MainPage mainPage;
         public Models.Users CurrentUser { get; private set; }
 
         public MainWindow() : this("Default") { }

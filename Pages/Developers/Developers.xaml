@@ -20,6 +20,8 @@
         <SolidColorBrush x:Key="TableHeader" Color="#F8F9FA"/>
         <SolidColorBrush x:Key="CardBackground" Color="#FAFAFA"/>
         <SolidColorBrush x:Key="SuccessGreen" Color="#4CAF50"/>
+        <SolidColorBrush x:Key="WarningOrange" Color="#FF9800"/>
+        <SolidColorBrush x:Key="InfoCyan" Color="#00BCD4"/>
 
         <!-- Стиль основной кнопки -->
         <Style x:Key="PrimaryButtonStyle" TargetType="Button">
@@ -64,6 +66,12 @@
         <!-- Стиль кнопки "Назад" -->
         <Style x:Key="BackButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
             <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+
+        <!-- Стиль опасной кнопки (удаление) -->
+        <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource AccentRed}"/>
+            <Setter Property="Foreground" Value="{StaticResource White}"/>
         </Style>
 
         <!-- Стиль поля поиска -->
@@ -131,7 +139,118 @@
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="8,4"/>
             <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
         </Style>
+
+        <!-- Стиль для отображения количества программ -->
+        <Style x:Key="ProgramCountBadgeStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource PrimaryBlue}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- DataTemplate для разработчика -->
+        <DataTemplate x:Key="DeveloperCardTemplate">
+            <Border Style="{StaticResource DeveloperCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Аватар с первой буквой -->
+                    <Border Grid.Column="0"
+                            Width="60" 
+                            Height="60" 
+                            Background="{Binding AvatarColor}"
+                            CornerRadius="30"
+                            Margin="0,0,20,0">
+                        <TextBlock Text="{Binding FirstLetter}" 
+                                   FontSize="24" 
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource White}"
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Информация о разработчике -->
+                    <StackPanel Grid.Column="1">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBlock Text="{Binding Nazvanie}" 
+                                       FontSize="18" 
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource DarkGray}"
+                                       VerticalAlignment="Center"/>
+
+                            <!-- Бейдж с количеством программ -->
+                            <Border Style="{StaticResource ProgramCountBadgeStyle}" 
+                                    Margin="10,0,0,0">
+                                <TextBlock Text="{Binding ProgramCount, StringFormat={}{0} программ}" 
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource White}"/>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Программы разработчика -->
+                        <StackPanel>
+                            <TextBlock Text="Программы разработчика:" 
+                                       Foreground="{StaticResource NeutralGray}"
+                                       FontSize="13"
+                                       Margin="0,0,0,6"/>
+
+                            <ItemsControl ItemsSource="{Binding Programs}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource SoftwareTagStyle}"
+                                                ToolTip="{Binding Versia, StringFormat=Версия: {0}}"
+                                                MouseLeftButtonDown="SoftwareTag_MouseLeftButtonDown">
+                                            <TextBlock Text="{Binding Nazvanie}" 
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource PrimaryBlue}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Сообщение если нет программ -->
+                            <TextBlock Text="У разработчика пока нет программ" 
+                                       FontSize="12"
+                                       FontStyle="Italic"
+                                       Foreground="{StaticResource NeutralGray}"
+                                       Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Кнопки действий -->
+                    <StackPanel Grid.Column="2" 
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Right">
+                        <Button Style="{StaticResource PrimaryButtonStyle}"
+                                Content="✏️ Редактировать"
+                                Width="140"
+                                Margin="0,0,0,8"
+                                Command="{Binding EditCommand}"/>
+
+                        <Button Style="{StaticResource DangerButtonStyle}"
+                                Content="🗑️ Удалить"
+                                Width="140"
+                                Command="{Binding DeleteCommand}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <!-- Конвертеры для Visibility -->
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Page.Resources>
 
     <Grid Background="{StaticResource LightGray}">
@@ -174,11 +293,12 @@
                             VerticalAlignment="Center">
 
                     <!-- Поле поиска -->
-                    <TextBox x:Name="search" 
+                    <TextBox x:Name="searchTextBox" 
                              Style="{StaticResource SearchTextBoxStyle}"
                              Width="300"
                              Height="38"
-                             KeyDown="KeyDown_Search"/>
+                             KeyDown="KeyDown_Search"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <!-- Кнопки сортировки -->
                     <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
@@ -214,236 +334,18 @@
         </Border>
 
         <!-- Основной контент -->
-        <ScrollViewer Margin="20,80,20,70">
-            <StackPanel x:Name="parent">
-
-                <!-- Пример карточки разработчика -->
-                <Border Style="{StaticResource DeveloperCardStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Аватар -->
-                        <Border Grid.Column="0"
-                                Width="60" 
-                                Height="60" 
-                                Background="{StaticResource PrimaryBlue}"
-                                CornerRadius="30"
-                                Margin="0,0,20,0">
-                            <TextBlock Text="M" 
-                                       FontSize="24" 
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource White}"
-                                       HorizontalAlignment="Center" 
-                                       VerticalAlignment="Center"/>
-                        </Border>
-
-                        <!-- Информация о разработчике -->
-                        <StackPanel Grid.Column="1">
-                            <TextBlock Text="Microsoft Corporation" 
-                                       FontSize="18" 
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource DarkGray}"
-                                       Margin="0,0,0,8"/>
-
-                            <!-- Программы разработчика -->
-                            <StackPanel>
-                                <TextBlock Text="Программы разработчика:" 
-                                           Foreground="{StaticResource NeutralGray}"
-                                           FontSize="13"
-                                           Margin="0,0,0,6"/>
-
-                                <WrapPanel>
-                                    <Border Style="{StaticResource SoftwareTagStyle}">
-                                        <TextBlock Text="Windows 10" 
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource PrimaryBlue}"/>
-                                    </Border>
-                                    <Border Style="{StaticResource SoftwareTagStyle}">
-                                        <TextBlock Text="Office 365" 
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource PrimaryBlue}"/>
-                                    </Border>
-                                    <Border Style="{StaticResource SoftwareTagStyle}">
-                                        <TextBlock Text="Visual Studio" 
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource PrimaryBlue}"/>
-                                    </Border>
-                                    <Border Style="{StaticResource SoftwareTagStyle}">
-                                        <TextBlock Text="SQL Server" 
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource PrimaryBlue}"/>
-                                    </Border>
-                                </WrapPanel>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <!-- Кнопки действий -->
-                        <StackPanel Grid.Column="2" 
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Right">
-                            <Button Style="{StaticResource PrimaryButtonStyle}"
-                                    Content="Редактировать"
-                                    Width="120"
-                                    Margin="0,0,0,8"/>
-
-                            <Button Style="{StaticResource SecondaryButtonStyle}"
-                                    Content="Удалить"
-                                    Width="120"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- Еще пример -->
-                <Border Style="{StaticResource DeveloperCardStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Border Grid.Column="0"
-                                Width="60" 
-                                Height="60" 
-                                Background="{StaticResource SuccessGreen}"
-                                CornerRadius="30"
-                                Margin="0,0,20,0">
-                            <TextBlock Text="A" 
-                                       FontSize="24" 
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource White}"
-                                       HorizontalAlignment="Center" 
-                                       VerticalAlignment="Center"/>
-                        </Border>
-
-                        <StackPanel Grid.Column="1">
-                            <TextBlock Text="Adobe Inc." 
-                                       FontSize="18" 
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource DarkGray}"
-                                       Margin="0,0,0,8"/>
-
-                            <StackPanel>
-                                <TextBlock Text="Программы разработчика:" 
-                                           Foreground="{StaticResource NeutralGray}"
-                                           FontSize="13"
-                                           Margin="0,0,0,6"/>
-
-                                <WrapPanel>
-                                    <Border Style="{StaticResource SoftwareTagStyle}">
-                                        <TextBlock Text="Photoshop" 
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource PrimaryBlue}"/>
-                                    </Border>
-                                    <Border Style="{StaticResource SoftwareTagStyle}">
-                                        <TextBlock Text="Illustrator" 
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource PrimaryBlue}"/>
-                                    </Border>
-                                    <Border Style="{StaticResource SoftwareTagStyle}">
-                                        <TextBlock Text="Acrobat Reader" 
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource PrimaryBlue}"/>
-                                    </Border>
-                                </WrapPanel>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2" 
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Right">
-                            <Button Style="{StaticResource PrimaryButtonStyle}"
-                                    Content="Редактировать"
-                                    Width="120"
-                                    Margin="0,0,0,8"/>
-
-                            <Button Style="{StaticResource SecondaryButtonStyle}"
-                                    Content="Удалить"
-                                    Width="120"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- Еще пример -->
-                <Border Style="{StaticResource DeveloperCardStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Border Grid.Column="0"
-                                Width="60" 
-                                Height="60" 
-                                Background="{StaticResource AccentRed}"
-                                CornerRadius="30"
-                                Margin="0,0,20,0">
-                            <TextBlock Text="J" 
-                                       FontSize="24" 
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource White}"
-                                       HorizontalAlignment="Center" 
-                                       VerticalAlignment="Center"/>
-                        </Border>
-
-                        <StackPanel Grid.Column="1">
-                            <TextBlock Text="JetBrains s.r.o." 
-                                       FontSize="18" 
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource DarkGray}"
-                                       Margin="0,0,0,8"/>
-
-                            <StackPanel>
-                                <TextBlock Text="Программы разработчика:" 
-                                           Foreground="{StaticResource NeutralGray}"
-                                           FontSize="13"
-                                           Margin="0,0,0,6"/>
-
-                                <WrapPanel>
-                                    <Border Style="{StaticResource SoftwareTagStyle}">
-                                        <TextBlock Text="IntelliJ IDEA" 
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource PrimaryBlue}"/>
-                                    </Border>
-                                    <Border Style="{StaticResource SoftwareTagStyle}">
-                                        <TextBlock Text="PyCharm" 
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource PrimaryBlue}"/>
-                                    </Border>
-                                    <Border Style="{StaticResource SoftwareTagStyle}">
-                                        <TextBlock Text="WebStorm" 
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource PrimaryBlue}"/>
-                                    </Border>
-                                    <Border Style="{StaticResource SoftwareTagStyle}">
-                                        <TextBlock Text="Rider" 
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource PrimaryBlue}"/>
-                                    </Border>
-                                </WrapPanel>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2" 
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Right">
-                            <Button Style="{StaticResource PrimaryButtonStyle}"
-                                    Content="Редактировать"
-                                    Width="120"
-                                    Margin="0,0,0,8"/>
-
-                            <Button Style="{StaticResource SecondaryButtonStyle}"
-                                    Content="Удалить"
-                                    Width="120"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-            </StackPanel>
+        <ScrollViewer Margin="20,80,20,70" VerticalScrollBarVisibility="Auto">
+            <!-- ItemsControl для динамического отображения карточек -->
+            <ItemsControl x:Name="developersItemsControl"
+                          ItemsSource="{Binding Developers}"
+                          ItemTemplate="{StaticResource DeveloperCardTemplate}"
+                          Visibility="{Binding HasDevelopers, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
         </ScrollViewer>
 
         <!-- Нижняя панель с информацией -->
@@ -466,7 +368,7 @@
                     <TextBlock Text="Всего разработчиков:" 
                                Foreground="{StaticResource NeutralGray}"
                                Margin="0,0,5,0"/>
-                    <TextBlock Text="3" 
+                    <TextBlock Text="{Binding TotalCount}" 
                                FontWeight="Medium"
                                Foreground="{StaticResource PrimaryBlue}"/>
 
@@ -477,7 +379,7 @@
                     <TextBlock Text="Всего программ:" 
                                Foreground="{StaticResource NeutralGray}"
                                Margin="0,0,5,0"/>
-                    <TextBlock Text="11" 
+                    <TextBlock Text="{Binding TotalPrograms}" 
                                FontWeight="Medium"
                                Foreground="{StaticResource PrimaryBlue}"/>
 
@@ -488,7 +390,7 @@
                     <TextBlock Text="Среднее программ на разработчика:" 
                                Foreground="{StaticResource NeutralGray}"
                                Margin="0,0,5,0"/>
-                    <TextBlock Text="3.7" 
+                    <TextBlock Text="{Binding AveragePrograms, StringFormat={}{0:F1}}" 
                                FontWeight="Medium"
                                Foreground="{StaticResource PrimaryBlue}"/>
                 </StackPanel>
@@ -501,21 +403,20 @@
                         Content="+ Добавить разработчика"
                         Width="200"
                         Height="38"
-                        Visibility="Hidden"/>
+                        Visibility="{Binding CanAddDeveloper, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             </Grid>
         </Border>
 
         <!-- Сообщение при пустом списке -->
-        <Border x:Name="emptyMessage"
-                Visibility="Collapsed"
+        <Border x:Name="emptyMessageBorder"
                 Background="{StaticResource White}"
                 CornerRadius="8"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Width="450"
+                Width="550"
                 Height="250">
 
-            <StackPanel HorizontalAlignment="Center" 
+            <StackPanel HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Margin="20">
 
@@ -547,10 +448,27 @@
 
                 <Button Style="{StaticResource PrimaryButtonStyle}"
                         Content="Добавить первого разработчика"
-                        Width="220"
+                        Width="250"
                         Height="38"
                         Margin="0,20,0,0"
                         Click="Add"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Прогресс-бар загрузки -->
+        <Border x:Name="loadingOverlay"
+                Background="#80000000"
+                Visibility="Collapsed"
+                Panel.ZIndex="1000">
+            <StackPanel HorizontalAlignment="Center" 
+                        VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True"
+                             Width="200"
+                             Height="20"
+                             Margin="0,0,0,10"/>
+                <TextBlock Text="Загрузка данных..." 
+                           Foreground="White"
+                           FontSize="14"/>
             </StackPanel>
         </Border>
     </Grid>

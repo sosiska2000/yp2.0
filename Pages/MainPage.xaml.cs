@@ -40,77 +40,77 @@ namespace EquipmentManagement.Client.Pages
 
         private void OpenEquip(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new Oborudovanie.Oborudovanie());
+            MainWindow.init.OpenPages(new Equipment.Equipment());
         }
 
         private void OpenEqType(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new OborType.OborType());
+            MainWindow.init.OpenPages(new EquipmentType.EquipmentType());
         }
 
         private void OpenAudien(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new Auditories.Auditories());
+            MainWindow.init.OpenPages(new Audiences.Audiences());
         }
 
         private void OpenProgr(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new Programs.Programs());
+            MainWindow.init.OpenPages(new Programs.Programs());
         }
 
         private void OpenDevel(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new Developers.Developers());
+            MainWindow.init.OpenPages(new Developers.Developers());
         }
 
         private void OpenRMat(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new RasxodMaterials.RasxodMaterials());
+            MainWindow.init.OpenPages(new Materials.Materials());
         }
 
         private void OpenCharRMat(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new Characteristics.Characteristics());
+            MainWindow.init.OpenPages(new Сharacteristic.Characteristic());
         }
 
         private void OpenModType(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new ViewModel.ViewModel());
+            MainWindow.init.OpenPages(new ViewModel.ViewModel());
         }
 
         private void OpenInvent(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new Inventory.Inventory());
+            MainWindow.init.OpenPages(new Inventory.Inventory());
         }
 
         private void OpenSettings(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new NetworkSettings.NetworkSettings());
+            MainWindow.init.OpenPages(new NetworkSettings.NetworkSettings());
         }
 
         private void OpenUsers(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new Users.Users());
+            MainWindow.init.OpenPages(new Users.Users());
         }
 
         private void OpenDirection(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new Napravlenie.Napravlenie());
+            MainWindow.init.OpenPages(new Direction.Direction());
         }
 
         private void OpenStatus(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new Status.Status());
+            MainWindow.init.OpenPages(new Status.Status());
         }
 
         private void OpenTypeChar(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new TypeCharacteristics.TypeCharacteristics());
+            MainWindow.init.OpenPages(new СharacteristicType.СharacteristicType());
         }
 
         private void OpenValueChar(object sender, RoutedEventArgs e)
         {
-            //MainWindow.init.OpenPages(new ValueCharacteristics.ValueCharacteristics());
+            MainWindow.init.OpenPages(new СharacteristicValue.СharacteristicValue());
         }
     }
 }

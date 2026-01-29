@@ -15,5 +15,6 @@ namespace EquipmentManagement.Client.Models
         public string ShortName { get; set; }
         public int ResponUser { get; set; }
         public int TimeResponUser { get; set; }
+
     }
 }

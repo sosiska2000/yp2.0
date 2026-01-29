@@ -1,14 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EquipmentManagement.Client.Context.Database;
+using EquipmentManagement.Client.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EquipmentManagement.Client.Context
 {
-    public class ValueCharacteristicsContext : DbContext
+    public class СharacteristicValueContext : DbContext
     {
-        public DbSet<ValueCharacteristics> ValueCharacteristics { get; set; }
-        public ValueCharacteristicsContext()
+        public DbSet<СharacteristicValue> СharacteristicValue { get; set; }
+        public СharacteristicValueContext()
         {
             Database.EnsureCreated();
-            ValueCharacteristics.Load();
+            СharacteristicValue.Load();
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

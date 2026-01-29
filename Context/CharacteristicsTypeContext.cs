@@ -1,21 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YP02.Context.Database;
-using YP02.Models;
+﻿using EquipmentManagement.Client.Context.Database;
+using EquipmentManagement.Client.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EquipmentManagement.Client.Context
 {
-    public class TypeCharacteristicsContext : DbContext
+    public class СharacteristicTypeContext : DbContext
     {
-        public DbSet<TypeCharacteristics> TypeCharacteristics { get; set; }
-        public TypeCharacteristicsContext()
+        public DbSet<СharacteristicType> СharacteristicType { get; set; }
+        public СharacteristicTypeContext()
         {
             Database.EnsureCreated();
-            TypeCharacteristics.Load();
+            СharacteristicType.Load();
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
