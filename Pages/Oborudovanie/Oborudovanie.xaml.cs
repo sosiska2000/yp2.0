@@ -3,49 +3,35 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using EquipmentManagement.Client.Context;
-using ExcelDataReader;
+using EquipmentManagement.Client.Models;
+using EquipmentManagement.Client.Services;
 using Microsoft.Win32;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
-using Path = System.IO.Path;
 
 namespace EquipmentManagement.Client.Pages.Oborudovanie
 {
-    /// <summary>
-    /// Логика взаимодействия для Oborudovanie.xaml
-    /// </summary>
     public partial class Oborudovanie : Page
     {
-        private readonly OborudovanieContext _oborudovanieContext;
-        private readonly UsersContext _usersContext;
-        private readonly ViewModelContext _viewModelContext;
+        private readonly ApiClient _apiClient;
         private Models.Users _currentUser;
         private Item _selectedItem;
         private List<Models.Oborudovanie> _allEquipment;
-
-        public OborudovanieContext OborudovanieContext => _oborudovanieContext;
+        private readonly UsersContext _usersContext;
 
         public Oborudovanie()
         {
             InitializeComponent();
 
-            _oborudovanieContext = new OborudovanieContext();
+            _apiClient = new ApiClient();
             _usersContext = new UsersContext();
-            _viewModelContext = new ViewModelContext();
-
             _currentUser = MainWindow.init.CurrentUser;
+
             if (_currentUser != null && _currentUser.Role == "Администратор")
             {
                 addBtn.Visibility = Visibility.Visible;
@@ -61,7 +47,24 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
         {
             try
             {
-                _allEquipment = await Task.Run(() => _oborudovanieContext.Oborudovanie.ToList());
+                // Получаем оборудование через API
+                var apiEquipment = await _apiClient.GetOborudovanieAsync();
+
+                // Конвертируем API модели в наши локальные модели
+                _allEquipment = apiEquipment.Select(apiModel => new Models.Oborudovanie
+                {
+                    Id = apiModel.Id,
+                    Name = apiModel.Nazvanie,
+                    InventNumber = apiModel.InventarnyiNomer,
+                    PriceObor = apiModel.Stoimost.ToString("F2"),
+                    IdResponUser = apiModel.OtvetstvennyiPolzovatelId,
+                    IdTimeResponUser = apiModel.VremennoOtvetstvennyiPolzovatelId,
+                    IdClassroom = apiModel.AuditoriaId,
+                    IdNapravObor = apiModel.NapravlenieId,
+                    IdStatusObor = apiModel.StatusId,
+                    IdModelObor = apiModel.VidModeliId,
+                    Comments = apiModel.Kommentarii
+                }).ToList();
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -77,6 +80,8 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
             catch (Exception ex)
             {
                 await LogError("Ошибка при загрузке оборудования: ", ex);
+                MessageBox.Show($"Ошибка загрузки: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -84,13 +89,25 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
         {
             try
             {
-                _oborudovanieContext.Oborudovanie.Remove(equipment);
-                await _oborudovanieContext.SaveChangesAsync();
-                _allEquipment.Remove(equipment);
+                var success = await _apiClient.DeleteOborudovanieAsync(equipment.Id);
+
+                if (success)
+                {
+                    _allEquipment.Remove(equipment);
+                    MessageBox.Show("Оборудование успешно удалено!", "Успех",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось удалить оборудование", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             catch (Exception ex)
             {
                 await LogError("Ошибка удаления", ex);
+                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 throw;
             }
         }
@@ -99,7 +116,6 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
         {
             var clickedItem = (Item)sender;
 
-            // Если кликнули на уже выделенный элемент - снимаем выделение
             if (_selectedItem == clickedItem)
             {
                 _selectedItem.IsSelected = false;
@@ -107,13 +123,11 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                 return;
             }
 
-            // Снимаем выделение с предыдущего элемента
             if (_selectedItem != null)
             {
                 _selectedItem.IsSelected = false;
             }
 
-            // Устанавливаем новое выделение
             _selectedItem = clickedItem;
             _selectedItem.IsSelected = true;
         }
@@ -127,11 +141,24 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
         {
             try
             {
-                string searchText = search.Text.ToLower();
+                string searchText = search.Text;
 
-                var filteredItems = string.IsNullOrWhiteSpace(searchText)
-                    ? _allEquipment
-                    : _allEquipment.Where(x => x.Name.ToLower().Contains(searchText)).ToList();
+                var apiEquipment = await _apiClient.GetOborudovanieAsync(searchText);
+
+                var filteredItems = apiEquipment.Select(apiModel => new Models.Oborudovanie
+                {
+                    Id = apiModel.Id,
+                    Name = apiModel.Nazvanie,
+                    InventNumber = apiModel.InventarnyiNomer,
+                    PriceObor = apiModel.Stoimost.ToString("F2"),
+                    IdResponUser = apiModel.OtvetstvennyiPolzovatelId,
+                    IdTimeResponUser = apiModel.VremennoOtvetstvennyiPolzovatelId,
+                    IdClassroom = apiModel.AuditoriaId,
+                    IdNapravObor = apiModel.NapravlenieId,
+                    IdStatusObor = apiModel.StatusId,
+                    IdModelObor = apiModel.VidModeliId,
+                    Comments = apiModel.Kommentarii
+                }).ToList();
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -141,7 +168,6 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                         var itemControl = new Item(item, this);
                         itemControl.SelectionChanged += ItemControl_SelectionChanged;
 
-                        // Восстанавливаем выделение после поиска
                         if (_selectedItem != null && item.Id == _selectedItem.Oborudovanie.Id)
                         {
                             itemControl.IsSelected = true;
@@ -155,6 +181,8 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
             catch (Exception ex)
             {
                 await LogError("Ошибка при поиске: ", ex);
+                MessageBox.Show($"Ошибка поиска: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -174,7 +202,22 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
         {
             try
             {
-                var sorted = await Task.Run(() => _allEquipment.OrderBy(x => x.Name).ToList()).ConfigureAwait(false);
+                var apiEquipment = await _apiClient.GetOborudovanieAsync(sort: "nazvanie");
+
+                var sorted = apiEquipment.Select(apiModel => new Models.Oborudovanie
+                {
+                    Id = apiModel.Id,
+                    Name = apiModel.Nazvanie,
+                    InventNumber = apiModel.InventarnyiNomer,
+                    PriceObor = apiModel.Stoimost.ToString("F2"),
+                    IdResponUser = apiModel.OtvetstvennyiPolzovatelId,
+                    IdTimeResponUser = apiModel.VremennoOtvetstvennyiPolzovatelId,
+                    IdClassroom = apiModel.AuditoriaId,
+                    IdNapravObor = apiModel.NapravlenieId,
+                    IdStatusObor = apiModel.StatusId,
+                    IdModelObor = apiModel.VidModeliId,
+                    Comments = apiModel.Kommentarii
+                }).ToList();
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -188,6 +231,8 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
             catch (Exception ex)
             {
                 await LogError("Ошибка при сортировке: ", ex);
+                MessageBox.Show($"Ошибка сортировки: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -195,7 +240,23 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
         {
             try
             {
-                var sorted = await Task.Run(() => _allEquipment.OrderByDescending(x => x.Name).ToList()).ConfigureAwait(false);
+                var apiEquipment = await _apiClient.GetOborudovanieAsync();
+                var sorted = apiEquipment
+                    .OrderByDescending(x => x.Nazvanie)
+                    .Select(apiModel => new Models.Oborudovanie
+                    {
+                        Id = apiModel.Id,
+                        Name = apiModel.Nazvanie,
+                        InventNumber = apiModel.InventarnyiNomer,
+                        PriceObor = apiModel.Stoimost.ToString("F2"),
+                        IdResponUser = apiModel.OtvetstvennyiPolzovatelId,
+                        IdTimeResponUser = apiModel.VremennoOtvetstvennyiPolzovatelId,
+                        IdClassroom = apiModel.AuditoriaId,
+                        IdNapravObor = apiModel.NapravlenieId,
+                        IdStatusObor = apiModel.StatusId,
+                        IdModelObor = apiModel.VidModeliId,
+                        Comments = apiModel.Kommentarii
+                    }).ToList();
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -209,6 +270,8 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
             catch (Exception ex)
             {
                 await LogError("Ошибка при сортировке: ", ex);
+                MessageBox.Show($"Ошибка сортировки: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -231,7 +294,8 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                 var selectedEquipment = GetSelectedEquipment();
                 if (selectedEquipment == null)
                 {
-                    MessageBox.Show("Пожалуйста, выберите оборудование для генерации отчета.");
+                    MessageBox.Show("Пожалуйста, выберите оборудование для генерации отчета.",
+                        "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -239,32 +303,21 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
 
                 await Task.Run(() =>
                 {
-                    var oborudovanie = _oborudovanieContext.Oborudovanie
-                        .FirstOrDefault(x => x.Id == selectedEquipment.Id);
-
-                    if (oborudovanie == null)
-                    {
-                        MessageBox.Show("Оборудование не найдено в базе данных.");
-                        return;
-                    }
-
                     var currentUser = _usersContext.Users.FirstOrDefault(x => x.Role == "Сотрудник");
 
                     using (DocX document = DocX.Create("Akt_Priema_Peredachi.docx"))
                     {
-                        // Добавляем заголовок
                         document.InsertParagraph("АКТ\nприема-передачи оборудования\n\n")
                             .Font("Times New Roman")
                             .FontSize(12)
                             .Alignment = Alignment.center;
 
-                        // Добавляем информацию о месте и дате
-                        var locationAndDate = document.InsertParagraph($"г. Пермь")
+                        document.InsertParagraph($"г. Пермь")
                             .Font("Times New Roman")
                             .FontSize(12)
                             .Alignment = Alignment.left;
 
-                        var date = document.InsertParagraph($"{currentDate}\n")
+                        document.InsertParagraph($"{currentDate}\n")
                             .Font("Times New Roman")
                             .FontSize(12)
                             .Alignment = Alignment.right;
@@ -281,10 +334,7 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                             mainText.Alignment = Alignment.both;
                         }
 
-                        var model = _viewModelContext.ViewModel
-                            .FirstOrDefault(x => x.Id == selectedEquipment.IdModelObor);
-
-                        var equipmentInfo = document.InsertParagraph($" {oborudovanie.Name} {model?.Name}, серийный номер {oborudovanie.InventNumber}, стоимостью {oborudovanie.PriceObor} руб. \n\n\n")
+                        var equipmentInfo = document.InsertParagraph($" {selectedEquipment.Name}, инвентарный номер {selectedEquipment.InventNumber}, стоимостью {selectedEquipment.PriceObor} руб. \n\n\n")
                             .Font("Times New Roman")
                             .FontSize(12)
                             .Alignment = Alignment.center;
@@ -304,11 +354,14 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                     }
                 });
 
-                MessageBox.Show("Документ успешно сгенерирован по пути: Desktop\\YP02\\bin\\Debug\\net6.0-windows");
+                MessageBox.Show("Документ успешно сгенерирован!", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 await LogError("Ошибка: ", ex);
+                MessageBox.Show($"Ошибка генерации документа: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -319,23 +372,14 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                 var selectedEquipment = GetSelectedEquipment();
                 if (selectedEquipment == null)
                 {
-                    MessageBox.Show("Пожалуйста, выберите оборудование для генерации отчета.");
+                    MessageBox.Show("Пожалуйста, выберите оборудование для генерации отчета.",
+                        "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 await Task.Run(() =>
                 {
                     string currentDate = DateTime.Now.ToString("dd.MM.yyyy");
-
-                    var oborudovanie = _oborudovanieContext.Oborudovanie
-                        .FirstOrDefault(x => x.Id == selectedEquipment.Id);
-
-                    if (oborudovanie == null)
-                    {
-                        MessageBox.Show("Оборудование не найдено в базе данных.");
-                        return;
-                    }
-
                     var currentUser = _usersContext.Users.FirstOrDefault(x => x.Role == "Сотрудник");
 
                     using (DocX document = DocX.Create("Akt_Priema_Peredachi_Vrem_Polz.docx"))
@@ -345,12 +389,12 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                             .FontSize(12)
                             .Alignment = Alignment.center;
 
-                        var locationAndDate = document.InsertParagraph($"г. Пермь")
+                        document.InsertParagraph($"г. Пермь")
                             .Font("Times New Roman")
                             .FontSize(12)
                             .Alignment = Alignment.left;
 
-                        var date = document.InsertParagraph($"{currentDate}\n")
+                        document.InsertParagraph($"{currentDate}\n")
                             .Font("Times New Roman")
                             .FontSize(12)
                             .Alignment = Alignment.right;
@@ -367,10 +411,7 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                             mainText.Alignment = Alignment.both;
                         }
 
-                        var model = _viewModelContext.ViewModel
-                            .FirstOrDefault(x => x.Id == selectedEquipment.IdModelObor);
-
-                        var equipmentInfo = document.InsertParagraph($" {oborudovanie.Name} {model?.Name}, серийный номер {oborudovanie.InventNumber}, стоимостью {oborudovanie.PriceObor} руб. \n\n")
+                        var equipmentInfo = document.InsertParagraph($" {selectedEquipment.Name}, инвентарный номер {selectedEquipment.InventNumber}, стоимостью {selectedEquipment.PriceObor} руб. \n\n")
                             .Font("Times New Roman")
                             .FontSize(12)
                             .Alignment = Alignment.center;
@@ -396,103 +437,14 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                     }
                 });
 
-                MessageBox.Show("Документ успешно сгенерирован по пути: Desktop\\YP02\\bin\\Debug\\net6.0-windows");
+                MessageBox.Show("Документ успешно сгенерирован!", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 await LogError("Ошибка: ", ex);
-            }
-        }
-
-        private List<Models.Oborudovanie> ReadExcelFile(string filePath)
-        {
-            List<Models.Oborudovanie> equipmentList = new List<Models.Oborudovanie>();
-
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
-            using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
-            {
-                using (var reader = ExcelReaderFactory.CreateReader(stream))
-                {
-                    // Используем конфигурацию чтения
-                    var configuration = new ExcelReaderConfiguration
-                    {
-                        // Указываем настройки чтения
-                    };
-
-                    // Читаем данные вручную
-                    do
-                    {
-                        // Пропускаем заголовок
-                        if (!reader.Read())
-                            continue;
-
-                        while (reader.Read())
-                        {
-                            try
-                            {
-                                // Получаем значения ячеек
-                                string userFIO = reader.GetValue(0)?.ToString()?.Trim();
-
-                                if (string.IsNullOrEmpty(userFIO))
-                                    continue;
-
-                                var user = _usersContext.Users.FirstOrDefault(u => u.FIO == userFIO);
-
-                                if (user == null)
-                                {
-                                    MessageBox.Show($"Ошибка: Пользователь '{userFIO}' не найден в базе!",
-                                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                                    continue;
-                                }
-
-                                string name = reader.GetValue(1)?.ToString() ?? "Не указано";
-                                string inventNumber = reader.GetValue(2)?.ToString() ?? "Не указано";
-
-                                equipmentList.Add(new Models.Oborudovanie
-                                {
-                                    Name = name,
-                                    InventNumber = inventNumber,
-                                    PriceObor = "Не указано",
-                                    IdResponUser = user.Id,
-                                    IdTimeResponUser = user.Id,
-                                    IdClassroom = 8,
-                                    IdNapravObor = 7,
-                                    IdStatusObor = 9,
-                                    IdModelObor = 6,
-                                    Comments = "Импортировано из Excel"
-                                });
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine($"Ошибка при чтении строки: {ex.Message}");
-                            }
-                        }
-                    } while (reader.NextResult());
-                }
-            }
-            return equipmentList;
-        }
-
-        private async Task SaveToDatabaseAsync(List<Models.Oborudovanie> equipmentList)
-        {
-            try
-            {
-                await Task.Run(() =>
-                {
-                    using (var context = new OborudovanieContext())
-                    {
-                        context.Oborudovanie.AddRange(equipmentList);
-                        context.SaveChanges();
-                    }
-                });
-
-                // Обновляем кэш после добавления новых записей
-                _allEquipment = await Task.Run(() => _oborudovanieContext.Oborudovanie.ToList());
-            }
-            catch (Exception ex)
-            {
-                await LogError("Ошибка: ", ex);
+                MessageBox.Show($"Ошибка генерации документа: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -502,33 +454,33 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
             {
                 OpenFileDialog openFileDialog = new OpenFileDialog
                 {
-                    Filter = "Excel Files|*.xls;*.xlsx",
-                    Title = "Выберите файл Excel"
+                    Filter = "Excel Files|*.xls;*.xlsx|CSV Files|*.csv|Text Files|*.txt",
+                    Title = "Выберите файл для импорта"
                 };
 
                 if (openFileDialog.ShowDialog() == true)
                 {
                     string filePath = openFileDialog.FileName;
-                    var equipmentList = await Task.Run(() => ReadExcelFile(filePath));
 
-                    // Сохраняем данные в базу
-                    await SaveToDatabaseAsync(equipmentList);
+                    // Показываем прогресс
+                    MessageBox.Show("Импорт начат. Пожалуйста, подождите...", "Импорт",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    MessageBox.Show("Импорт завершён успешно!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // TODO: Нужно реализовать метод импорта в ApiClient
+                    // var result = await _apiClient.ImportEquipmentFromFileAsync(filePath);
 
-                    await Dispatcher.InvokeAsync(() =>
-                    {
-                        parent.Children.Clear();
-                        foreach (var item in _allEquipment)
-                        {
-                            parent.Children.Add(new Item(item, this));
-                        }
-                    });
+                    MessageBox.Show("Функция импорта через API пока не реализована. Используйте локальную базу или добавьте метод в ApiClient.",
+                        "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // Обновляем список после импорта
+                    await LoadEquipmentAsync();
                 }
             }
             catch (Exception ex)
             {
                 await LogError("Ошибка: ", ex);
+                MessageBox.Show($"Ошибка импорта: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -538,15 +490,9 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
 
             try
             {
-                await using (var errorsContext = new ErrorsContext())
-                {
-                    errorsContext.Errors.Add(new Models.Errors { Message = ex.Message });
-                    await errorsContext.SaveChangesAsync();
-                }
-                string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", "log.txt");
+                string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "error.txt");
                 Directory.CreateDirectory(Path.GetDirectoryName(logPath) ?? string.Empty);
-
-                await File.AppendAllTextAsync(logPath, $"{DateTime.Now}: {ex.Message}\n{ex.StackTrace}\n\n");
+                await File.AppendAllTextAsync(logPath, $"{DateTime.Now}: {message} - {ex.Message}\n{ex.StackTrace}\n\n");
             }
             catch (Exception logEx)
             {
