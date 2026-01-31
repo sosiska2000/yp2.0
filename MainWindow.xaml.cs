@@ -6,15 +6,17 @@ namespace EquipmentManagement.Client
     public partial class MainWindow : Window
     {
         public static MainWindow init;
-        public static Pages.MainPage mainPage;
+        public static Pages.Menu menu;
         public Models.Users CurrentUser { get; private set; }
 
         public MainWindow() : this("Default") { }
+
         public MainWindow(string role)
         {
             InitializeComponent();
             init = this;
-            OpenPages(new Pages.MainPage());
+            OpenPages(new Pages.Authorization());
+
         }
         public void OpenPages(Page page)
         {

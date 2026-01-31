@@ -4,111 +4,70 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:EquipmentManagement.Client.Pages.Programs"
-      mc:Ignorable="d" 
-      d:DesignHeight="700" d:DesignWidth="1200"
-      Title="Программное обеспечение">
+        mc:Ignorable="d" 
+  d:DesignHeight="650" d:DesignWidth="1000"
+  Title="Программы" 
+  FontFamily="/Fonts/#Montserrat">
 
     <Page.Resources>
-        <!-- Цветовая палитра по ТЗ -->
-        <SolidColorBrush x:Key="PrimaryBlue" Color="#0060AC"/>
-        <SolidColorBrush x:Key="AccentRed" Color="#E41613"/>
-        <SolidColorBrush x:Key="NeutralGray" Color="#9EA1A2"/>
-        <SolidColorBrush x:Key="LightGray" Color="#F5F5F5"/>
-        <SolidColorBrush x:Key="White" Color="White"/>
-        <SolidColorBrush x:Key="DarkGray" Color="#333333"/>
-        <SolidColorBrush x:Key="HoverBlue" Color="#E3F2FD"/>
-        <SolidColorBrush x:Key="CardBackground" Color="#FAFAFA"/>
-        <SolidColorBrush x:Key="ProgramTypeColor1" Color="#2196F3"/>
-        <SolidColorBrush x:Key="ProgramTypeColor2" Color="#4CAF50"/>
-        <SolidColorBrush x:Key="ProgramTypeColor3" Color="#FF9800"/>
-
-        <!-- Стиль основной кнопки -->
-        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource PrimaryBlue}"/>
-            <Setter Property="Foreground" Value="{StaticResource White}"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="12,8"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
+        <!-- Используем те же стили что и на предыдущей странице -->
+        <Style x:Key="ModernCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Effect">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" 
-                                Background="{TemplateBinding Background}" 
-                                CornerRadius="6">
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                              VerticalAlignment="Center"
-                                              Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#0077CC"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#005A99"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
+                    <DropShadowEffect ShadowDepth="2" BlurRadius="10" Opacity="0.1"/>
                 </Setter.Value>
             </Setter>
         </Style>
 
-        <!-- Стиль вторичной кнопки -->
-        <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource White}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource NeutralGray}"/>
+        <Style x:Key="ModernTextBoxStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="{StaticResource DarkGray}"/>
-        </Style>
-
-        <!-- Стиль кнопки "Назад" -->
-        <Style x:Key="BackButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
-            <Setter Property="FontWeight" Value="Medium"/>
-        </Style>
-
-        <!-- Стиль для поля поиска -->
-        <Style x:Key="SearchTextBoxStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="{StaticResource White}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource NeutralGray}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="{StaticResource DarkGray}"/>
-            <Setter Property="FontSize" Value="14"/>
             <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
+                    <ControlTemplate TargetType="{x:Type TextBox}">
                         <Border x:Name="border" 
-                                Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6">
+                            CornerRadius="8" 
+                            Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="True">
                             <Grid>
                                 <ScrollViewer x:Name="PART_ContentHost" 
-                                              VerticalAlignment="Center"
-                                              HorizontalScrollBarVisibility="Hidden"/>
-                                <TextBlock Text="Поиск по названию программы..." 
-                                           Foreground="{StaticResource NeutralGray}"
-                                           Margin="12,0"
-                                           VerticalAlignment="Center"
-                                           IsHitTestVisible="False"
-                                           Visibility="Collapsed">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource AncestorType=TextBox}}" Value="">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                          Focusable="False" 
+                                          HorizontalScrollBarVisibility="Hidden" 
+                                          VerticalScrollBarVisibility="Hidden"/>
+                                <TextBlock x:Name="placeholder" 
+                                       Text="{TemplateBinding Tag}" 
+                                       Foreground="#999999" 
+                                       Margin="12,10" 
+                                       Visibility="Collapsed"
+                                       IsHitTestVisible="False"/>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#0060AC"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
+                            </Trigger>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryBlue}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#0060AC"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                                <Setter TargetName="border" Property="Background" Value="#F8FAFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -116,40 +75,101 @@
             </Setter>
         </Style>
 
-        <!-- Стиль для карточек программ -->
-        <Style x:Key="ProgramCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource NeutralGray}"/>
+        <Style x:Key="ModernButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="#0060AC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#005099"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" 
+                            CornerRadius="8" 
+                            Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="True">
+                            <ContentPresenter x:Name="contentPresenter" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#005099"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#004080"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#004080"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ModernButtonStyle}">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#0060AC"/>
+            <Setter Property="BorderBrush" Value="#0060AC"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="20"/>
-            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F0F8FF"/>
+                    <Setter Property="BorderBrush" Value="#005099"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
-        <!-- Стиль для тегов разработчиков -->
-        <Style x:Key="DeveloperTagStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource HoverBlue}"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="Margin" Value="0,0,8,0"/>
+        <Style x:Key="IconButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ModernButtonStyle}">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#666666"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F0F8FF"/>
+                    <Setter Property="Foreground" Value="#0060AC"/>
+                    <Setter Property="BorderBrush" Value="#0060AC"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
-        <!-- Стиль для тегов типа программы -->
-        <Style x:Key="ProgramTypeTagStyle" TargetType="Border">
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="Padding" Value="6,3"/>
-            <Setter Property="Margin" Value="0,0,6,6"/>
+        <Style x:Key="DangerButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ModernButtonStyle}">
+            <Setter Property="Background" Value="#E41613"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#CC120F"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#CC120F"/>
+                    <Setter Property="BorderBrush" Value="#AA0E0C"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Page.Resources>
 
-    <Grid Background="{StaticResource LightGray}">
-        <!-- Верхняя панель -->
-        <Border Background="{StaticResource White}" 
-                Height="70" 
-                VerticalAlignment="Top"
-                BorderBrush="{StaticResource NeutralGray}"
-                BorderThickness="0,0,0,1">
+    <Grid>
+        <!-- Фоновое изображение с логотипом -->
+        <Grid.Background>
+            <ImageBrush ImageSource="/Images/logo.png" 
+                    Stretch="UniformToFill" 
+                    Opacity="0.05"/>
+        </Grid.Background>
 
+        <!-- Верхняя панель управления -->
+        <Border Background="White" 
+            CornerRadius="0,0,12,12" 
+            Height="80" 
+            VerticalAlignment="Top"
+            BorderBrush="#E0E0E0"
+            BorderThickness="0,0,0,1">
             <Grid Margin="20,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -158,330 +178,144 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Заголовок -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="💻" 
-                               FontSize="24" 
-                               VerticalAlignment="Center" 
-                               Margin="0,0,10,0"/>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
                     <TextBlock Text="ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ" 
-                               FontSize="20" 
-                               FontWeight="Bold"
-                               Foreground="{StaticResource PrimaryBlue}"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Text="(1.6)" 
-                               FontSize="12" 
-                               Foreground="{StaticResource NeutralGray}"
-                               VerticalAlignment="Bottom"
-                               Margin="5,0,0,2"/>
+                           FontSize="12" 
+                           FontWeight="Bold" 
+                           Foreground="#9EA1A2"
+                           Margin="0,0,0,2"/>
+                    <TextBlock Text="Установленные программы на оборудовании" 
+                           FontSize="18" 
+                           FontWeight="Bold" 
+                           Foreground="#0060AC"/>
                 </StackPanel>
 
-                <!-- Панель поиска и сортировки -->
+                <!-- Поиск и сортировка -->
                 <StackPanel Grid.Column="1" 
-                            Orientation="Horizontal" 
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-
-                    <!-- Поле поиска -->
+                        Orientation="Horizontal" 
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Center">
                     <TextBox x:Name="search" 
-                             Style="{StaticResource SearchTextBoxStyle}"
-                             Width="300"
-                             Height="38"
-                             KeyDown="KeyDown_Search"/>
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Tag="Поиск по названию программы..."
+                         Width="280" 
+                         Height="40"
+                         KeyDown="KeyDown_Search"/>
 
-                    <!-- Кнопки сортировки -->
-                    <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
-                        <Button x:Name="btnSortUp"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                Content="▲"
-                                Width="40"
-                                Height="38"
-                                FontSize="16"
-                                Click="SortUp"
-                                ToolTip="Сортировка по названию (А-Я)"/>
+                    <StackPanel Orientation="Horizontal" Margin="15,0,0,0">
+                        <Button x:Name="btnSortUp" 
+                            Content="↑" 
+                            Style="{StaticResource IconButtonStyle}"
+                            FontFamily="Segoe UI"
+                            ToolTip="Сортировать по возрастанию"
+                            Click="SortUp"/>
 
-                        <Button x:Name="btnSortDown"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                Content="▼"
-                                Width="40"
-                                Height="38"
-                                FontSize="16"
-                                Margin="5,0,0,0"
-                                Click="SortDown"
-                                ToolTip="Сортировка по названию (Я-А)"/>
+                        <Button x:Name="btnSortDown" 
+                            Content="↓" 
+                            Style="{StaticResource IconButtonStyle}"
+                            FontFamily="Segoe UI"
+                            Margin="5,0,0,0"
+                            ToolTip="Сортировать по убыванию"
+                            Click="SortDown"/>
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Кнопка "Назад" -->
-                <Button Grid.Column="2"
-                        Style="{StaticResource BackButtonStyle}"
-                        Click="Back"
-                        Content="← Назад"
-                        Width="100"
-                        Height="38"/>
+                <!-- Кнопка назад -->
+                <Button Grid.Column="2" 
+                    x:Name="btnBack"
+                    Content="← Назад" 
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    VerticalAlignment="Center"
+                    Width="120"
+                    Click="Back"/>
             </Grid>
         </Border>
 
         <!-- Основной контент -->
-        <ScrollViewer Margin="20,80,20,70">
+        <ScrollViewer Margin="20,90,20,80" 
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
             <StackPanel x:Name="parent">
-
-                <!-- Пример программы -->
-                <Border Style="{StaticResource ProgramCardStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Информация о программе -->
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Microsoft Office 365" 
-                                       FontSize="16" 
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource DarkGray}"
-                                       Margin="0,0,0,10"/>
-
-                            <!-- Разработчик -->
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                <TextBlock Text="Разработчик:" 
-                                           Foreground="{StaticResource NeutralGray}"
-                                           Margin="0,0,5,0"
-                                           VerticalAlignment="Center"/>
-
-                                <Border Style="{StaticResource DeveloperTagStyle}">
-                                    <TextBlock Text="Microsoft Corporation" 
-                                               FontSize="12"
-                                               Foreground="{StaticResource PrimaryBlue}"/>
-                                </Border>
-                            </StackPanel>
-
-                            <!-- Описание -->
-                            <StackPanel Margin="0,0,0,10">
-                                <TextBlock Text="Описание:" 
-                                           Foreground="{StaticResource NeutralGray}"
-                                           Margin="0,0,0,5"/>
-                                <TextBlock Text="Офисный пакет приложений для повышения производительности, включающий Word, Excel, PowerPoint и Outlook" 
-                                           FontSize="13" 
-                                           Foreground="{StaticResource DarkGray}"
-                                           TextWrapping="Wrap"/>
-                            </StackPanel>
-
-                            <!-- Типы программ -->
-                            <StackPanel>
-                                <TextBlock Text="Типы программ:" 
-                                           Foreground="{StaticResource NeutralGray}"
-                                           Margin="0,0,0,5"/>
-
-                                <WrapPanel>
-                                    <Border Style="{StaticResource ProgramTypeTagStyle}"
-                                            Background="#E3F2FD">
-                                        <TextBlock Text="Текстовый редактор" 
-                                                   FontSize="12"/>
-                                    </Border>
-                                    <Border Style="{StaticResource ProgramTypeTagStyle}"
-                                            Background="#E8F5E9">
-                                        <TextBlock Text="Табличный процессор" 
-                                                   FontSize="12"/>
-                                    </Border>
-                                    <Border Style="{StaticResource ProgramTypeTagStyle}"
-                                            Background="#FFF3E0">
-                                        <TextBlock Text="Презентации" 
-                                                   FontSize="12"/>
-                                    </Border>
-                                </WrapPanel>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <!-- Кнопки действий -->
-                        <StackPanel Grid.Column="2" 
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Right">
-                            <Button Style="{StaticResource PrimaryButtonStyle}"
-                                    Content="Редактировать"
-                                    Width="120"
-                                    Margin="0,0,0,8"/>
-
-                            <Button Style="{StaticResource SecondaryButtonStyle}"
-                                    Content="Удалить"
-                                    Width="120"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- Еще пример -->
-                <Border Style="{StaticResource ProgramCardStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Visual Studio 2022" 
-                                       FontSize="16" 
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource DarkGray}"
-                                       Margin="0,0,0,10"/>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                <TextBlock Text="Разработчик:" 
-                                           Foreground="{StaticResource NeutralGray}"
-                                           Margin="0,0,5,0"
-                                           VerticalAlignment="Center"/>
-
-                                <Border Style="{StaticResource DeveloperTagStyle}">
-                                    <TextBlock Text="Microsoft" 
-                                               FontSize="12"
-                                               Foreground="{StaticResource PrimaryBlue}"/>
-                                </Border>
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,10">
-                                <TextBlock Text="Описание:" 
-                                           Foreground="{StaticResource NeutralGray}"
-                                           Margin="0,0,0,5"/>
-                                <TextBlock Text="Интегрированная среда разработки для создания консольных и графических приложений" 
-                                           FontSize="13" 
-                                           Foreground="{StaticResource DarkGray}"
-                                           TextWrapping="Wrap"/>
-                            </StackPanel>
-
-                            <StackPanel>
-                                <TextBlock Text="Назначение:" 
-                                           Foreground="{StaticResource NeutralGray}"
-                                           Margin="0,0,0,5"/>
-
-                                <WrapPanel>
-                                    <Border Style="{StaticResource ProgramTypeTagStyle}"
-                                            Background="#F3E5F5">
-                                        <TextBlock Text="Разработка ПО" 
-                                                   FontSize="12"/>
-                                    </Border>
-                                    <Border Style="{StaticResource ProgramTypeTagStyle}"
-                                            Background="#E3F2FD">
-                                        <TextBlock Text="Отладка" 
-                                                   FontSize="12"/>
-                                    </Border>
-                                    <Border Style="{StaticResource ProgramTypeTagStyle}"
-                                            Background="#FFF3E0">
-                                        <TextBlock Text="Тестирование" 
-                                                   FontSize="12"/>
-                                    </Border>
-                                </WrapPanel>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2" 
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Right">
-                            <Button Style="{StaticResource PrimaryButtonStyle}"
-                                    Content="Редактировать"
-                                    Width="120"
-                                    Margin="0,0,0,8"/>
-
-                            <Button Style="{StaticResource SecondaryButtonStyle}"
-                                    Content="Удалить"
-                                    Width="120"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                <!-- Карточки программ -->
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Нижняя панель с информацией -->
-        <Border Background="{StaticResource White}" 
-                Height="60" 
-                VerticalAlignment="Bottom"
-                BorderBrush="{StaticResource NeutralGray}"
-                BorderThickness="0,1,0,0">
-
+        <!-- Нижняя панель -->
+        <Border Background="White" 
+            Height="70" 
+            VerticalAlignment="Bottom"
+            BorderBrush="#E0E0E0"
+            BorderThickness="0,1,0,0">
             <Grid Margin="20,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Информация о количестве -->
-                <StackPanel Grid.Column="0" 
-                            Orientation="Horizontal" 
-                            VerticalAlignment="Center">
-                    <TextBlock Text="Всего программ:" 
-                               Foreground="{StaticResource NeutralGray}"
-                               Margin="0,0,5,0"/>
-                    <TextBlock Text="2" 
-                               FontWeight="Medium"
-                               Foreground="{StaticResource PrimaryBlue}"/>
-
-                    <TextBlock Text="•" 
-                               Foreground="{StaticResource NeutralGray}"
-                               Margin="10,0,5,0"/>
-
-                    <TextBlock Text="Разработчиков:" 
-                               Foreground="{StaticResource NeutralGray}"
-                               Margin="0,0,5,0"/>
-                    <TextBlock Text="2" 
-                               FontWeight="Medium"
-                               Foreground="{StaticResource ProgramTypeColor1}"/>
+                <!-- Статус информации -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock x:Name="statusText" 
+                           Text="Найдено 0 программ" 
+                           FontSize="14" 
+                           Foreground="#666666"/>
                 </StackPanel>
 
                 <!-- Кнопка добавления -->
-                <Button Grid.Column="1"
-                        x:Name="addBtn"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Click="Add"
-                        Content="+ Добавить программу"
-                        Width="200"
-                        Height="38"
-                        Visibility="Hidden"/>
+                <Button Grid.Column="1" 
+                    x:Name="addBtn" 
+                    Visibility="Hidden"
+                    Content="+ Добавить программу" 
+                    Style="{StaticResource ModernButtonStyle}"
+                    VerticalAlignment="Center"
+                    Width="200"
+                    Click="Add">
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="+" 
+                                       FontSize="18" 
+                                       FontWeight="Bold"
+                                       Margin="0,0,8,0"/>
+                                <TextBlock Text="Добавить программу" 
+                                       VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
             </Grid>
         </Border>
 
-        <!-- Сообщение при пустом списке -->
-        <Border x:Name="emptyMessage"
-                Visibility="Collapsed"
-                Background="{StaticResource White}"
-                CornerRadius="8"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Width="500"
-                Height="250">
-
-            <StackPanel HorizontalAlignment="Center" 
-                        VerticalAlignment="Center"
-                        Margin="20">
-
-                <TextBlock Text="💻" 
-                           FontSize="40" 
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,15"/>
-
-                <TextBlock Text="Программное обеспечение" 
-                           FontSize="18" 
-                           FontWeight="SemiBold"
-                           Foreground="{StaticResource DarkGray}"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,8"/>
-
-                <TextBlock Text="Добавляйте программное обеспечение, установленное на оборудовании." 
-                           FontSize="13" 
-                           Foreground="{StaticResource NeutralGray}"
-                           HorizontalAlignment="Center"
-                           TextAlignment="Center"
-                           Margin="0,0,0,8"/>
-
-                <TextBlock Text="По ТЗ: программы связываются с оборудованием и разработчиками" 
-                           FontSize="12" 
-                           Foreground="{StaticResource NeutralGray}"
-                           HorizontalAlignment="Center"
-                           TextAlignment="Center"
-                           FontStyle="Italic"/>
-
-                <Button Style="{StaticResource PrimaryButtonStyle}"
-                        Content="Добавить первую программу"
-                        Width="220"
-                        Height="38"
-                        Margin="0,20,0,0"
-                        Click="Add"/>
+        <!-- Пустое состояние -->
+        <Border x:Name="emptyState" 
+            Visibility="Collapsed" 
+            VerticalAlignment="Center" 
+            HorizontalAlignment="Center"
+            Background="White"
+            CornerRadius="12"
+            Padding="40"
+            BorderBrush="#E0E0E0"
+            BorderThickness="1">
+            <StackPanel>
+                <TextBlock Text="💻"
+                       FontSize="60"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,20"/>
+                <TextBlock Text="Программы не найдены" 
+                       FontSize="18" 
+                       FontWeight="SemiBold" 
+                       Foreground="#666666"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,10"/>
+                <TextBlock Text="Добавьте первую программу" 
+                       FontSize="14" 
+                       Foreground="#999999"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"/>
+                <Button Content="Добавить программу" 
+                    Style="{StaticResource ModernButtonStyle}"
+                    Width="200"
+                    Margin="0,20,0,0"
+                    Click="Add"/>
             </StackPanel>
         </Border>
     </Grid>

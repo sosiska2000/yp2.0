@@ -1,122 +1,124 @@
 ﻿using System;
-using System.Net.Http;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Newtonsoft.Json;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using EquipmentManagement.Client.Context;
+using Path = System.IO.Path;
 
 namespace EquipmentManagement.Client.Pages.Developers
 {
+    /// <summary>
+    /// Логика взаимодействия для Add.xaml
+    /// </summary>
     public partial class Add : Page
     {
-        private readonly HttpClient _httpClient;
-        private Models.Developer? _editingDeveloper;
+        // Поле для хранения ссылки на основной объект разработчиков
+        public Developers MainDevelopers;
 
-        public Add(Models.Developer? developerToEdit = null)
+        // Поле для хранения информации о конкретном разработчике
+        public Models.Developers developers;
+
+        public Add(Developers MainDevelopers, Models.Developers developers = null)
         {
             InitializeComponent();
 
-            // Используем глобальный HttpClient из App.xaml.cs
-            _httpClient = App.HttpClient;
+            // Присваивание переданных параметров полям класса
+            this.MainDevelopers = MainDevelopers;
+            this.developers = developers;
 
-            _editingDeveloper = developerToEdit;
-
-            if (_editingDeveloper != null)
+            // Если объект разработчика не равен null, заполняем текстовое поле его именем
+            if (developers != null)
             {
-                lb_title.Content = "Редактирование разработчика";
-                bt_click.Content = "Сохранить";
-                tb_Name.Text = _editingDeveloper.Nazvanie;
+                lb_title.Content = "Изменение разработчика";
+                bt_click.Content = "Изменить";
+                tb_Name.Text = developers.Name;
             }
         }
 
-        private bool ValidateForm()
+        // Обработчик события нажатия кнопки "Редактировать"
+        private void Click_Redact(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(tb_Name.Text))
-            {
-                MessageBox.Show("Введите название разработчика", "Ошибка валидации",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                tb_Name.Focus();
-                return false;
-            }
-
-            return true;
-        }
-
-        private async void Click_Redact(object sender, RoutedEventArgs e)
-        {
-            if (!ValidateForm()) return;
-
             try
             {
-                if (_editingDeveloper == null)
+                // Проверка, введено ли название разработчика
+                if (string.IsNullOrEmpty(tb_Name.Text))
                 {
-                    // СОЗДАНИЕ нового разработчика
-                    var newDeveloper = new
-                    {
-                        Nazvanie = tb_Name.Text.Trim()
-                    };
+                    // Если нет, выводим сообщение об ошибке
+                    MessageBox.Show("Введите название типа оборудования");
+                    return; // Прерываем выполнение метода
+                }
 
-                    var json = JsonConvert.SerializeObject(newDeveloper);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                    var response = await _httpClient.PostAsync("/api/Razrabotchiki/create", content);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        MessageBox.Show("Разработчик успешно создан", "Успех",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
-
-                        // Очищаем форму
-                        tb_Name.Clear();
-                        tb_Name.Focus();
-                    }
-                    else
-                    {
-                        var error = await response.Content.ReadAsStringAsync();
-                        MessageBox.Show($"Ошибка создания: {error}", "Ошибка",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+                // Если объект разработчика равен null, создаем новый объект
+                if (developers == null)
+                {
+                    developers = new Models.Developers();
+                    developers.Name = tb_Name.Text; // Устанавливаем имя разработчика
+                    MainDevelopers.DevelopersContext.Developers.Add(developers); // Добавляем нового разработчика в контекст
                 }
                 else
                 {
-                    // ОБНОВЛЕНИЕ существующего разработчика
-                    var updateDeveloper = new
-                    {
-                        Id = _editingDeveloper.Id,
-                        Nazvanie = tb_Name.Text.Trim()
-                    };
-
-                    var json = JsonConvert.SerializeObject(updateDeveloper);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                    var response = await _httpClient.PutAsync($"/api/Razrabotchiki/update/{_editingDeveloper.Id}", content);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        MessageBox.Show("Разработчик успешно обновлен", "Успех",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
-
-                        // Возвращаемся назад
-                        NavigationService?.Navigate(new Developers());
-                    }
-                    else
-                    {
-                        var error = await response.Content.ReadAsStringAsync();
-                        MessageBox.Show($"Ошибка обновления: {error}", "Ошибка",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+                    // Если объект разработчика существует, обновляем его имя
+                    developers.Name = tb_Name.Text;
                 }
+
+                // Сохраняем изменения в контексте разработчиков
+                MainDevelopers.DevelopersContext.SaveChanges();
+
+                // Открываем страницу со списком разработчиков
+                MainWindow.init.OpenPages(new Pages.Developers.Developers());
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                LogError("Ошибка", ex).ConfigureAwait(false);
             }
         }
 
+        // Обработчик события нажатия кнопки "Отмена"
         private void Click_Cancel_Redact(object sender, RoutedEventArgs e)
         {
-            NavigationService?.Navigate(new Developers());
+            try
+            {
+                // Открываем страницу со списком разработчиков без сохранения изменений
+                MainWindow.init.OpenPages(new Pages.Developers.Developers());
+            }
+            catch (Exception ex)
+            {
+                LogError("Ошибка", ex).ConfigureAwait(false);
+            }
+        }
+
+        private async Task LogError(string message, Exception ex)
+        {
+            Debug.WriteLine($"{message}: {ex.Message}");
+
+            try
+            {
+                await using (var errorsContext = new ErrorsContext())
+                {
+                    errorsContext.Errors.Add(new Models.Errors { Message = ex.Message });
+                    await errorsContext.SaveChangesAsync();
+                }
+                string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", "log.txt");
+                Directory.CreateDirectory(Path.GetDirectoryName(logPath) ?? string.Empty);
+
+                await File.AppendAllTextAsync(logPath, $"{DateTime.Now}: {ex.Message}\n{ex.StackTrace}\n\n");
+            }
+            catch (Exception logEx)
+            {
+                Debug.WriteLine($"Ошибка при записи в лог-файл: {logEx.Message}");
+            }
         }
     }
 }

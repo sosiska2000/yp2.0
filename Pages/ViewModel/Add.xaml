@@ -4,10 +4,10 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:EquipmentManagement.Client.Pages.ViewModel"
-            mc:Ignorable="d" 
-      d:DesignHeight="550" d:DesignWidth="900"
-      Title="Add" FontFamily="/Fonts/#Montserrat"
-    xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.AeroLite">
+        mc:Ignorable="d" 
+  d:DesignHeight="550" d:DesignWidth="900"
+  Title="Add" FontFamily="/Fonts/#Montserrat"
+xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.AeroLite">
     <Page.Resources>
         <SolidColorBrush x:Key="TextBox.Static.Border" Color="#FFE2E3EA"/>
         <SolidColorBrush x:Key="TextBox.MouseOver.Border" Color="#FFC5DAED"/>

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:EquipmentManagement.Client.Pages.ViewModel"
-                      mc:Ignorable="d" FontFamily="/Fonts/#Montserrat">
+             mc:Ignorable="d" FontFamily="/Fonts/#Montserrat">
     <UserControl.Resources>
         <Style x:Key="FocusVisual">
             <Setter Property="Control.Template">
