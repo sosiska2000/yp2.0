@@ -84,7 +84,7 @@ namespace RestAPI.Services
         }
 
         // ПРОВЕРКА IP АДРЕСА ПО МАСКЕ XXX.XXX.XXX.XXX (0-255)
-        private bool IsValidIPAddress(string ip)
+        public bool IsValidIPAddress(string ip)
         {
             if (string.IsNullOrEmpty(ip)) return false;
 

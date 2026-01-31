@@ -1,15 +1,30 @@
+using System.IO;
+using System.Reflection;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Graph.Models;
 using Microsoft.OpenApi;
 using RestAPI.Connect;
 using RestAPI.Services;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Добавь это для работы с CORS (чтобы WPF мог подключаться)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowWpfClient",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost", "https://localhost") // Добавь нужные адреса
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>();
 
+// Регистрируем все сервисы
 builder.Services.AddScoped<OborudovanieService>();
 builder.Services.AddScoped<PolzovateliService>();
 builder.Services.AddScoped<AuditoriiService>();
@@ -28,14 +43,17 @@ builder.Services.AddScoped<InventarizatsiaDetaliService>();
 builder.Services.AddScoped<LogiOshibokService>();
 builder.Services.AddScoped<DokumentyService>();
 
+// Настройки для загрузки файлов
 builder.Services.Configure<FormOptions>(options =>
 {
     options.ValueLengthLimit = int.MaxValue;
-    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; 
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
     options.MemoryBufferThreshold = 1024 * 1024;
 });
 
 builder.Services.AddEndpointsApiExplorer();
+
+// Настройка Swagger
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -54,17 +72,16 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
-
+// Создаем директорию для логов
 var logsDir = Path.Combine(Directory.GetCurrentDirectory(), "logs");
 if (!Directory.Exists(logsDir))
 {
     Directory.CreateDirectory(logsDir);
 }
 
-
 var app = builder.Build();
 
-
+// Настройка конвейера запросов
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -84,12 +101,15 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+// Добавляем CORS перед авторизацией
+app.UseCors("AllowWpfClient");
+
 app.UseAuthorization();
 
 app.MapControllers();
 
-
-
+// Глобальная обработка ошибок
 app.Use(async (context, next) =>
 {
     try
@@ -98,7 +118,7 @@ app.Use(async (context, next) =>
     }
     catch (Exception ex)
     {
- 
+        // Логируем ошибку
         using var scope = app.Services.CreateScope();
         var logService = scope.ServiceProvider.GetRequiredService<LogiOshibokService>();
         logService.LogError("Middleware", ex.Message);

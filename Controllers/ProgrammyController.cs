@@ -1,93 +1,93 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using RestAPI.Models;
-using RestAPI.Services;
+﻿    using Microsoft.AspNetCore.Mvc;
+    using RestAPI.Models;
+    using RestAPI.Services;
 
-namespace RestAPI.Controllers
-{
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ProgrammyController : ControllerBase
+    namespace RestAPI.Controllers
     {
-        private readonly ProgrammyService _service;
-
-        public ProgrammyController(ProgrammyService service)
+        [Route("api/[controller]")]
+        [ApiController]
+        public class ProgrammyController : ControllerBase
         {
-            _service = service;
-        }
+            private readonly ProgrammyService _service;
 
-        [HttpGet("list")]
-        public IActionResult GetProgrammy([FromQuery] string? search, [FromQuery] string? sortBy)
-        {
-            try
+            public ProgrammyController(ProgrammyService service)
             {
-                var programmy = _service.GetAll(search, sortBy).ToList();
-                return Ok(programmy);
+                _service = service;
             }
-            catch
-            {
-                return StatusCode(500, "Внутренняя ошибка сервера");
-            }
-        }
 
-        [HttpGet("item/{id}")]
-        public IActionResult GetProgrammaById(int id)
-        {
-            try
+            [HttpGet("list")]
+            public IActionResult GetProgrammy([FromQuery] string? search, [FromQuery] string? sortBy)
             {
-                var programma = _service.GetById(id);
-                if (programma == null)
+                try
                 {
-                    return NotFound($"Программа с идентификатором {id} не найдена");
+                    var programmy = _service.GetAll(search, sortBy).ToList();
+                    return Ok(programmy);
                 }
-                return Ok(programma);
-            }
-            catch
-            {
-                return StatusCode(500, "Внутренняя ошибка сервера");
-            }
-        }
-
-        [HttpPost("create")]
-        public IActionResult CreateProgramma([FromBody] Programma programma)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(programma.Nazvanie))
+                catch
                 {
-                    return BadRequest("Название обязательно");
+                    return StatusCode(500, "Внутренняя ошибка сервера");
                 }
-
-                _service.Create(programma);
-                return Ok(programma);
             }
-            catch
-            {
-                return StatusCode(500, "Внутренняя ошибка сервера");
-            }
-        }
 
-        [HttpDelete("delete/{id}")]
-        public IActionResult DeleteProgramma(int id)
-        {
-            try
+            [HttpGet("item/{id}")]
+            public IActionResult GetProgrammaById(int id)
             {
-                if (_service.HasConnections(id))
+                try
                 {
-                    return BadRequest("Невозможно удалить программу, так как она связана с оборудованием");
+                    var programma = _service.GetById(id);
+                    if (programma == null)
+                    {
+                        return NotFound($"Программа с идентификатором {id} не найдена");
+                    }
+                    return Ok(programma);
                 }
-
-                var success = _service.Delete(id);
-                if (!success)
+                catch
                 {
-                    return NotFound($"Программа с идентификатором {id} не найдена");
+                    return StatusCode(500, "Внутренняя ошибка сервера");
                 }
-
-                return NoContent();
             }
-            catch
+
+            [HttpPost("create")]
+            public IActionResult CreateProgramma([FromBody] Programma programma)
             {
-                return StatusCode(500, "Внутренняя ошибка сервера");
+                try
+                {
+                    if (string.IsNullOrEmpty(programma.Nazvanie))
+                    {
+                        return BadRequest("Название обязательно");
+                    }
+
+                    _service.Create(programma);
+                    return Ok(programma);
+                }
+                catch
+                {
+                    return StatusCode(500, "Внутренняя ошибка сервера");
+                }
+            }
+
+            [HttpDelete("delete/{id}")]
+            public IActionResult DeleteProgramma(int id)
+            {
+                try
+                {
+                    if (_service.HasConnections(id))
+                    {
+                        return BadRequest("Невозможно удалить программу, так как она связана с оборудованием");
+                    }
+
+                    var success = _service.Delete(id);
+                    if (!success)
+                    {
+                        return NotFound($"Программа с идентификатором {id} не найдена");
+                    }
+
+                    return NoContent();
+                }
+                catch
+                {
+                    return StatusCode(500, "Внутренняя ошибка сервера");
+                }
             }
         }
     }
-}
