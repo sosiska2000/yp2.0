@@ -1,6 +1,6 @@
 ﻿namespace RestAPI.Models
 {
-    public class Status
+    public class EquipmentType
     {
         public int Id { get; set; }
         public string Name { get; set; }
