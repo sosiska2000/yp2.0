@@ -1,6 +1,6 @@
 ﻿namespace EquipmentManagement.Client.Models
 {
-    public class Status
+    public class ConsumableType
     {
         public int Id { get; set; }
         public string Name { get; set; }
