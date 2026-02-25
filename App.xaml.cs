@@ -1,33 +1,19 @@
-﻿using System;
-using System.Net.Http;
+﻿using EquipmentManagement.Client.Services;
+using EquipmentManagement.Client.ViewModels;
 using System.Windows;
 
 namespace EquipmentManagement.Client
 {
     public partial class App : Application
     {
-        public static HttpClient HttpClient { get; private set; } = null!;
+            public static ApiService Api { get; private set; }
 
-        protected override void OnStartup(StartupEventArgs e)
-        {
-            base.OnStartup(e);
-
-            // Создаем глобальный HttpClient
-            HttpClient = new HttpClient
+            protected override void OnStartup(StartupEventArgs e)
             {
-                BaseAddress = new Uri("https://localhost:5001"), // Ваш URL API
-                Timeout = TimeSpan.FromSeconds(30)
-            };
+                base.OnStartup(e);
 
-            HttpClient.DefaultRequestHeaders.Accept.Clear();
-            HttpClient.DefaultRequestHeaders.Accept.Add(
-                new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-        }
-
-        protected override void OnExit(ExitEventArgs e)
-        {
-            base.OnExit(e);
-            HttpClient?.Dispose();
+                // Укажите правильный URL вашего API
+                Api = new ApiService("https://localhost:7000");
+            }
         }
     }
-}

@@ -18,7 +18,7 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
 {
     public partial class Oborudovanie : Page
     {
-        private readonly ApiClient _apiClient;
+        private readonly ApiService _apiService;
         private Models.Users _currentUser;
         private Item _selectedItem;
         private List<Models.Oborudovanie> _allEquipment;
@@ -28,7 +28,7 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
         {
             InitializeComponent();
 
-            _apiClient = new ApiClient();
+            _apiService = App.Api;
             _usersContext = new UsersContext();
             _currentUser = MainWindow.init.CurrentUser;
 
@@ -40,31 +40,15 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                 import.Visibility = Visibility.Visible;
             }
 
-            LoadEquipmentAsync().ConfigureAwait(false);
+            Loaded += async (s, e) => await LoadEquipmentAsync();
         }
 
         private async Task LoadEquipmentAsync()
         {
             try
             {
-                // Получаем оборудование через API
-                var apiEquipment = await _apiClient.GetOborudovanieAsync();
-
-                // Конвертируем API модели в наши локальные модели
-                _allEquipment = apiEquipment.Select(apiModel => new Models.Oborudovanie
-                {
-                    Id = apiModel.Id,
-                    Name = apiModel.Nazvanie,
-                    InventNumber = apiModel.InventarnyiNomer,
-                    PriceObor = apiModel.Stoimost.ToString("F2"),
-                    IdResponUser = apiModel.OtvetstvennyiPolzovatelId,
-                    IdTimeResponUser = apiModel.VremennoOtvetstvennyiPolzovatelId,
-                    IdClassroom = apiModel.AuditoriaId,
-                    IdNapravObor = apiModel.NapravlenieId,
-                    IdStatusObor = apiModel.StatusId,
-                    IdModelObor = apiModel.VidModeliId,
-                    Comments = apiModel.Kommentarii
-                }).ToList();
+                var apiEquipment = await _apiService.Oborudovanie.GetOborudovanie();
+                _allEquipment = apiEquipment.ToLocalModels();
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -89,13 +73,25 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
         {
             try
             {
-                var success = await _apiClient.DeleteOborudovanieAsync(equipment.Id);
+                var result = await _apiService.Oborudovanie.DeleteOborudovanie(equipment.Id);
 
-                if (success)
+                if (!string.IsNullOrEmpty(result))
                 {
                     _allEquipment.Remove(equipment);
+
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        if (_selectedItem != null && _selectedItem.Oborudovanie.Id == equipment.Id)
+                        {
+                            _selectedItem.IsSelected = false;
+                            _selectedItem = null;
+                        }
+                    });
+
                     MessageBox.Show("Оборудование успешно удалено!", "Успех",
                         MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    await LoadEquipmentAsync();
                 }
                 else
                 {
@@ -108,7 +104,6 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                 await LogError("Ошибка удаления", ex);
                 MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Error);
-                throw;
             }
         }
 
@@ -142,23 +137,8 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
             try
             {
                 string searchText = search.Text;
-
-                var apiEquipment = await _apiClient.GetOborudovanieAsync(searchText);
-
-                var filteredItems = apiEquipment.Select(apiModel => new Models.Oborudovanie
-                {
-                    Id = apiModel.Id,
-                    Name = apiModel.Nazvanie,
-                    InventNumber = apiModel.InventarnyiNomer,
-                    PriceObor = apiModel.Stoimost.ToString("F2"),
-                    IdResponUser = apiModel.OtvetstvennyiPolzovatelId,
-                    IdTimeResponUser = apiModel.VremennoOtvetstvennyiPolzovatelId,
-                    IdClassroom = apiModel.AuditoriaId,
-                    IdNapravObor = apiModel.NapravlenieId,
-                    IdStatusObor = apiModel.StatusId,
-                    IdModelObor = apiModel.VidModeliId,
-                    Comments = apiModel.Kommentarii
-                }).ToList();
+                var apiEquipment = await _apiService.Oborudovanie.GetOborudovanie(searchText);
+                var filteredItems = apiEquipment.ToLocalModels();
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -202,29 +182,17 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
         {
             try
             {
-                var apiEquipment = await _apiClient.GetOborudovanieAsync(sort: "nazvanie");
-
-                var sorted = apiEquipment.Select(apiModel => new Models.Oborudovanie
-                {
-                    Id = apiModel.Id,
-                    Name = apiModel.Nazvanie,
-                    InventNumber = apiModel.InventarnyiNomer,
-                    PriceObor = apiModel.Stoimost.ToString("F2"),
-                    IdResponUser = apiModel.OtvetstvennyiPolzovatelId,
-                    IdTimeResponUser = apiModel.VremennoOtvetstvennyiPolzovatelId,
-                    IdClassroom = apiModel.AuditoriaId,
-                    IdNapravObor = apiModel.NapravlenieId,
-                    IdStatusObor = apiModel.StatusId,
-                    IdModelObor = apiModel.VidModeliId,
-                    Comments = apiModel.Kommentarii
-                }).ToList();
+                var apiEquipment = await _apiService.Oborudovanie.GetOborudovanie(sort: "nazvanie");
+                var sorted = apiEquipment.ToLocalModels();
 
                 await Dispatcher.InvokeAsync(() =>
                 {
                     parent.Children.Clear();
                     foreach (var oborudovanie in sorted)
                     {
-                        parent.Children.Add(new Item(oborudovanie, this));
+                        var itemControl = new Item(oborudovanie, this);
+                        itemControl.SelectionChanged += ItemControl_SelectionChanged;
+                        parent.Children.Add(itemControl);
                     }
                 });
             }
@@ -240,30 +208,19 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
         {
             try
             {
-                var apiEquipment = await _apiClient.GetOborudovanieAsync();
+                var apiEquipment = await _apiService.Oborudovanie.GetOborudovanie();
                 var sorted = apiEquipment
                     .OrderByDescending(x => x.Nazvanie)
-                    .Select(apiModel => new Models.Oborudovanie
-                    {
-                        Id = apiModel.Id,
-                        Name = apiModel.Nazvanie,
-                        InventNumber = apiModel.InventarnyiNomer,
-                        PriceObor = apiModel.Stoimost.ToString("F2"),
-                        IdResponUser = apiModel.OtvetstvennyiPolzovatelId,
-                        IdTimeResponUser = apiModel.VremennoOtvetstvennyiPolzovatelId,
-                        IdClassroom = apiModel.AuditoriaId,
-                        IdNapravObor = apiModel.NapravlenieId,
-                        IdStatusObor = apiModel.StatusId,
-                        IdModelObor = apiModel.VidModeliId,
-                        Comments = apiModel.Kommentarii
-                    }).ToList();
+                    .ToLocalModels();
 
                 await Dispatcher.InvokeAsync(() =>
                 {
                     parent.Children.Clear();
                     foreach (var oborudovanie in sorted)
                     {
-                        parent.Children.Add(new Item(oborudovanie, this));
+                        var itemControl = new Item(oborudovanie, this);
+                        itemControl.SelectionChanged += ItemControl_SelectionChanged;
+                        parent.Children.Add(itemControl);
                     }
                 });
             }
@@ -325,16 +282,19 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                         if (currentUser != null)
                         {
                             var fioParts = currentUser.FIO.Split(' ');
-                            string lastName = fioParts[0];
-                            string initials = $"{fioParts[1][0]}.{fioParts[2][0]}.";
-                            var mainText = document.InsertParagraph($"КГАПОУ Пермский Авиационный техникум им. А.Д. Швецова в целях\nобеспечения необходимым оборудованием для исполнения должностных обязанностей\nпередаёт сотруднику {lastName} {initials}, а сотрудник принимает от учебного учреждения\nследующее оборудование:\n\n");
-                            mainText.Font("Times New Roman");
-                            mainText.FontSize(12);
-                            mainText.IndentationFirstLine = 26;
-                            mainText.Alignment = Alignment.both;
+                            if (fioParts.Length >= 3)
+                            {
+                                string lastName = fioParts[0];
+                                string initials = $"{fioParts[1][0]}.{fioParts[2][0]}.";
+                                var mainText = document.InsertParagraph($"КГАПОУ Пермский Авиационный техникум им. А.Д. Швецова в целях\nобеспечения необходимым оборудованием для исполнения должностных обязанностей\nпередаёт сотруднику {lastName} {initials}, а сотрудник принимает от учебного учреждения\nследующее оборудование:\n\n");
+                                mainText.Font("Times New Roman");
+                                mainText.FontSize(12);
+                                mainText.IndentationFirstLine = 26;
+                                mainText.Alignment = Alignment.both;
+                            }
                         }
 
-                        var equipmentInfo = document.InsertParagraph($" {selectedEquipment.Name}, инвентарный номер {selectedEquipment.InventNumber}, стоимостью {selectedEquipment.PriceObor} руб. \n\n\n")
+                        document.InsertParagraph($" {selectedEquipment.Name}, инвентарный номер {selectedEquipment.InventNumber}, стоимостью {selectedEquipment.PriceObor} руб. \n\n\n")
                             .Font("Times New Roman")
                             .FontSize(12)
                             .Alignment = Alignment.center;
@@ -342,12 +302,15 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                         if (currentUser != null)
                         {
                             var fioParts = currentUser.FIO.Split(' ');
-                            string lastName = fioParts[0];
-                            string initials = $"{fioParts[1][0]}.{fioParts[2][0]}.";
-                            var paragraph = document.InsertParagraph($"{lastName} {initials}       ____________________     ________________")
-                                .Font("Times New Roman")
-                                .FontSize(12)
-                                .Alignment = Alignment.left;
+                            if (fioParts.Length >= 3)
+                            {
+                                string lastName = fioParts[0];
+                                string initials = $"{fioParts[1][0]}.{fioParts[2][0]}.";
+                                document.InsertParagraph($"{lastName} {initials}       ____________________     ________________")
+                                    .Font("Times New Roman")
+                                    .FontSize(12)
+                                    .Alignment = Alignment.left;
+                            }
                         }
 
                         document.Save();
@@ -402,13 +365,16 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                         if (currentUser != null)
                         {
                             var fioParts = currentUser.FIO.Split(' ');
-                            string lastName = fioParts[0];
-                            string initials = $"{fioParts[1][0]}.{fioParts[2][0]}.";
-                            var mainText = document.InsertParagraph($"КГАПОУ Пермский Авиационный техникум им. А.Д. Швецова в целях\nобеспечения необходимым оборудованием для исполнения должностных обязанностей\nпередаёт сотруднику {lastName} {initials}, а сотрудник принимает от учебного учреждения\nследующее оборудование:\n\n");
-                            mainText.Font("Times New Roman");
-                            mainText.FontSize(12);
-                            mainText.IndentationFirstLine = 26;
-                            mainText.Alignment = Alignment.both;
+                            if (fioParts.Length >= 3)
+                            {
+                                string lastName = fioParts[0];
+                                string initials = $"{fioParts[1][0]}.{fioParts[2][0]}.";
+                                var mainText = document.InsertParagraph($"КГАПОУ Пермский Авиационный техникум им. А.Д. Швецова в целях\nобеспечения необходимым оборудованием для исполнения должностных обязанностей\nпередаёт сотруднику {lastName} {initials}, а сотрудник принимает от учебного учреждения\nследующее оборудование:\n\n");
+                                mainText.Font("Times New Roman");
+                                mainText.FontSize(12);
+                                mainText.IndentationFirstLine = 26;
+                                mainText.Alignment = Alignment.both;
+                            }
                         }
 
                         var equipmentInfo = document.InsertParagraph($" {selectedEquipment.Name}, инвентарный номер {selectedEquipment.InventNumber}, стоимостью {selectedEquipment.PriceObor} руб. \n\n")
@@ -425,12 +391,15 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                         if (currentUser != null)
                         {
                             var fioParts = currentUser.FIO.Split(' ');
-                            string lastName = fioParts[0];
-                            string initials = $"{fioParts[1][0]}.{fioParts[2][0]}.";
-                            var paragraph = document.InsertParagraph($"{lastName} {initials}       ____________________     ________________")
-                                .Font("Times New Roman")
-                                .FontSize(12)
-                                .Alignment = Alignment.left;
+                            if (fioParts.Length >= 3)
+                            {
+                                string lastName = fioParts[0];
+                                string initials = $"{fioParts[1][0]}.{fioParts[2][0]}.";
+                                var paragraph = document.InsertParagraph($"{lastName} {initials}       ____________________     ________________")
+                                    .Font("Times New Roman")
+                                    .FontSize(12)
+                                    .Alignment = Alignment.left;
+                            }
                         }
 
                         document.Save();
@@ -462,17 +431,13 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                 {
                     string filePath = openFileDialog.FileName;
 
-                    // Показываем прогресс
                     MessageBox.Show("Импорт начат. Пожалуйста, подождите...", "Импорт",
                         MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    // TODO: Нужно реализовать метод импорта в ApiClient
-                    // var result = await _apiClient.ImportEquipmentFromFileAsync(filePath);
-
-                    MessageBox.Show("Функция импорта через API пока не реализована. Используйте локальную базу или добавьте метод в ApiClient.",
+                    // TODO: Добавить метод импорта
+                    MessageBox.Show("Функция импорта через API пока не реализована.",
                         "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    // Обновляем список после импорта
                     await LoadEquipmentAsync();
                 }
             }

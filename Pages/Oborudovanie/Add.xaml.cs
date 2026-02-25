@@ -16,6 +16,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using EquipmentManagement.Client.Context;
+using EquipmentManagement.Client.Models;
+using EquipmentManagement.Client.Models.DTO;
+using EquipmentManagement.Client.Services;
 using Microsoft.Win32;
 using Path = System.IO.Path;
 
@@ -28,6 +31,9 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
     {
         public Oborudovanie MainOborudovanie;
         public Models.Oborudovanie oborudovanie;
+        private readonly ApiService _apiService;
+
+        // Контексты для выпадающих списков
         AuditoriesContext auditoriesContext = new();
         UsersContext usersContext = new();
         NapravlenieContext napravlenieContext = new();
@@ -35,47 +41,97 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
         ViewModelContext viewModelContext = new();
 
         private byte[] tempPhoto = null;
-        public Models.HistoryObor historyObor;
-        public Models.HistoryAuditory historyAuditory;
 
         public Add(Oborudovanie MainOborudovanie, Models.Oborudovanie oborudovanie = null)
         {
             InitializeComponent();
             this.MainOborudovanie = MainOborudovanie;
             this.oborudovanie = oborudovanie;
+            _apiService = App.Api;
+
+            // Загружаем данные для выпадающих списков
+            LoadComboBoxes();
 
             if (oborudovanie != null)
             {
                 text1.Content = "Изменение оборудования";
                 text2.Content = "Изменить";
+
+                // Заполняем поля данными выбранного оборудования
                 tb_Name.Text = oborudovanie.Name;
                 tb_invNum.Text = oborudovanie.InventNumber;
-                tb_Audience.SelectedItem = auditoriesContext.Auditories.FirstOrDefault(x => x.Id == oborudovanie.IdClassroom)?.Name;
-                tb_User.SelectedItem = usersContext.Users.FirstOrDefault(x => x.Id == oborudovanie.IdResponUser)?.FIO;
-                tb_tempUser.SelectedItem = usersContext.Users.FirstOrDefault(x => x.Id == oborudovanie.IdTimeResponUser)?.FIO;
                 tb_Price.Text = oborudovanie.PriceObor;
-                tb_Direction.SelectedItem = napravlenieContext.Napravlenie.FirstOrDefault(x => x.Id == oborudovanie.IdNapravObor)?.Name;
-                tb_Status.SelectedItem = statusContext.Status.FirstOrDefault(x => x.Id == oborudovanie.IdStatusObor)?.Name;
-                tb_Model.SelectedItem = viewModelContext.ViewModel.FirstOrDefault(x => x.Id == oborudovanie.IdModelObor)?.Name;
                 tb_Comment.Text = oborudovanie.Comments;
 
+                // Устанавливаем выбранные значения в ComboBox
+                SetSelectedValues();
             }
+        }
 
-            foreach (var item in auditoriesContext.Auditories) tb_Audience.Items.Add(item.Name);
+        private void LoadComboBoxes()
+        {
+            // Аудитории
+            foreach (var item in auditoriesContext.Auditories)
+                tb_Audience.Items.Add(item.Name);
+
+            // Пользователи (для ответственного и временно ответственного)
             foreach (var item in usersContext.Users)
             {
                 tb_User.Items.Add(item.FIO);
                 tb_tempUser.Items.Add(item.FIO);
             }
-            foreach (var item in napravlenieContext.Napravlenie) tb_Direction.Items.Add(item.Name);
-            foreach (var item in statusContext.Status) tb_Status.Items.Add(item.Name);
-            foreach (var item in viewModelContext.ViewModel) tb_Model.Items.Add(item.Name);
+
+            // Направления
+            foreach (var item in napravlenieContext.Napravlenie)
+                tb_Direction.Items.Add(item.Name);
+
+            // Статусы
+            foreach (var item in statusContext.Status)
+                tb_Status.Items.Add(item.Name);
+
+            // Модели
+            foreach (var item in viewModelContext.ViewModel)
+                tb_Model.Items.Add(item.Name);
         }
 
-        private void Click_Redact(object sender, RoutedEventArgs e)
+        private void SetSelectedValues()
+        {
+            // Аудитория
+            var audience = auditoriesContext.Auditories.FirstOrDefault(x => x.Id == oborudovanie.IdClassroom);
+            if (audience != null)
+                tb_Audience.SelectedItem = audience.Name;
+
+            // Ответственный пользователь
+            var user = usersContext.Users.FirstOrDefault(x => x.Id == oborudovanie.IdResponUser);
+            if (user != null)
+                tb_User.SelectedItem = user.FIO;
+
+            // Временно ответственный пользователь
+            var tempUser = usersContext.Users.FirstOrDefault(x => x.Id == oborudovanie.IdTimeResponUser);
+            if (tempUser != null)
+                tb_tempUser.SelectedItem = tempUser.FIO;
+
+            // Направление
+            var direction = napravlenieContext.Napravlenie.FirstOrDefault(x => x.Id == oborudovanie.IdNapravObor);
+            if (direction != null)
+                tb_Direction.SelectedItem = direction.Name;
+
+            // Статус
+            var status = statusContext.Status.FirstOrDefault(x => x.Id == oborudovanie.IdStatusObor);
+            if (status != null)
+                tb_Status.SelectedItem = status.Name;
+
+            // Модель
+            var model = viewModelContext.ViewModel.FirstOrDefault(x => x.Id == oborudovanie.IdModelObor);
+            if (model != null)
+                tb_Model.SelectedItem = model.Name;
+        }
+
+        private async void Click_Redact(object sender, RoutedEventArgs e)
         {
             try
             {
+                // Валидация (как была ранее)
                 if (string.IsNullOrEmpty(tb_Name.Text))
                 {
                     MessageBox.Show("Введите наименование оборудования");
@@ -86,7 +142,6 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                     MessageBox.Show("Введите инвентарный номер оборудования");
                     return;
                 }
-                // Валидация инвентарного номера (только цифры)
                 if (!Regex.IsMatch(tb_invNum.Text, @"^\d*$"))
                 {
                     MessageBox.Show("Инвентарный номер должен содержать только цифры");
@@ -112,7 +167,6 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                     MessageBox.Show("Введите стоимость оборудования");
                     return;
                 }
-                // Валидация стоимости (только цифры и возможно десятичная точка)
                 if (!Regex.IsMatch(tb_Price.Text, @"^[\d]+([,.]?[\d]{0,2})?$"))
                 {
                     MessageBox.Show("Стоимость должна быть числом и может содержать до двух десятичных знаков");
@@ -134,14 +188,16 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                     return;
                 }
 
+                // Сохраняем старые значения для истории
+                int oldIdResponUser = oborudovanie?.IdResponUser ?? 0;
+                int oldIdClassroom = oborudovanie?.IdClassroom ?? 0;
+
                 if (oborudovanie == null)
                 {
                     oborudovanie = new Models.Oborudovanie();
                 }
 
-                int oldIdResponUser = oborudovanie.IdResponUser;
-                int oldIdClassroom = oborudovanie.IdClassroom;
-
+                // Заполняем модель данными
                 oborudovanie.Name = tb_Name.Text;
                 oborudovanie.InventNumber = tb_invNum.Text;
                 oborudovanie.IdClassroom = auditoriesContext.Auditories.First(x => x.Name == tb_Audience.SelectedItem).Id;
@@ -153,63 +209,33 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
                 oborudovanie.IdModelObor = viewModelContext.ViewModel.First(x => x.Name == tb_Model.SelectedItem).Id;
                 oborudovanie.Comments = tb_Comment.Text;
 
-                // Если фотография не была загружена, оставляем старую
                 if (tempPhoto != null)
                 {
                     oborudovanie.Photo = tempPhoto;
                 }
 
+                // Сохраняем через API
                 if (oborudovanie.Id == 0)
                 {
-                    MainOborudovanie.OborudovanieContext.Oborudovanie.Add(oborudovanie);
+                    var created = await _apiService.Oborudovanie.CreateOborudovanie(oborudovanie);
+                    oborudovanie.Id = created.Id;
+                    MessageBox.Show("Оборудование успешно создано!", "Успех",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-
-                MainOborudovanie.OborudovanieContext.SaveChanges();
-
-                // Проверяем, изменился ли IdTimeResponUser
-                if (oldIdResponUser != oborudovanie.IdResponUser)
+                else
                 {
-                    // Создаем запись в истории
-                    var historyObor = new Models.HistoryObor
-                    {
-                        IdUserr = usersContext.Users.First(x => x.FIO == tb_User.SelectedItem).Id,
-                        IdObor = oborudovanie.Id, // Используем Id оборудования, который был сгенерирован при сохранении
-                        Date = DateTime.Now,
-                        Comment = tb_Comment.Text
-                    };
-
-                    // Используем HistoryOborContext для сохранения истории
-                    using (var historyContext = new HistoryOborContext())
-                    {
-                        historyContext.HistoryObor.Add(historyObor);
-                        historyContext.SaveChanges();
-                    }
-                }
-
-                // Проверяем, изменился ли IdClassroom
-                if (oldIdClassroom != oborudovanie.IdClassroom)
-                {
-                    // Создаем запись в истории
-                    var historyAuditory = new Models.HistoryAuditory
-                    {
-                        IdClassroom = auditoriesContext.Auditories.First(x => x.Name == tb_Audience.SelectedItem).Id,
-                        IdObor = oborudovanie.Id, // Используем Id оборудования, который был сгенерирован при сохранении
-                        Date = DateTime.Now,
-                    };
-
-                    // Используем HistoryAuditoryContext для сохранения истории
-                    using (var historyAuditoryContext = new HistoryAuditoryContex())
-                    {
-                        historyAuditoryContext.HistoryAuditory.Add(historyAuditory);
-                        historyAuditoryContext.SaveChanges();
-                    }
+                    await _apiService.Oborudovanie.UpdateOborudovanie(oborudovanie.Id, oborudovanie);
+                    MessageBox.Show("Оборудование успешно обновлено!", "Успех",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
                 MainWindow.init.OpenPages(new Pages.Oborudovanie.Oborudovanie());
             }
             catch (Exception ex)
             {
-                LogError("Ошибка", ex).ConfigureAwait(false);
+                await LogError("Ошибка при сохранении", ex);
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -231,7 +257,8 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
             {
                 var ofd = new OpenFileDialog
                 {
-                    Filter = "Image Files (*.jpg;*.jpeg;*.png;*.gif)|*.jpg;*.jpeg;*.png;*.gif"
+                    Filter = "Image Files (*.jpg;*.jpeg;*.png;*.gif)|*.jpg;*.jpeg;*.png;*.gif",
+                    Title = "Выберите фотографию оборудования"
                 };
 
                 if (ofd.ShowDialog() == true)
@@ -264,15 +291,18 @@ namespace EquipmentManagement.Client.Pages.Oborudovanie
 
             try
             {
+                // Сохраняем в базу ошибок
                 await using (var errorsContext = new ErrorsContext())
                 {
                     errorsContext.Errors.Add(new Models.Errors { Message = ex.Message });
                     await errorsContext.SaveChangesAsync();
                 }
-                string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", "log.txt");
+
+                // Сохраняем в файл
+                string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "error.txt");
                 Directory.CreateDirectory(Path.GetDirectoryName(logPath) ?? string.Empty);
 
-                await File.AppendAllTextAsync(logPath, $"{DateTime.Now}: {ex.Message}\n{ex.StackTrace}\n\n");
+                await File.AppendAllTextAsync(logPath, $"{DateTime.Now}: {message} - {ex.Message}\n{ex.StackTrace}\n\n");
             }
             catch (Exception logEx)
             {
