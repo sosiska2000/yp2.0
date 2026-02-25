@@ -51,7 +51,7 @@ builder.Services.Configure<FormOptions>(options =>
     options.ValueLengthLimit = int.MaxValue;
     options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
     options.MemoryBufferThreshold = 1024 * 1024;
-});
+}); 
 
 builder.Services.AddEndpointsApiExplorer();
 

@@ -17,6 +17,7 @@ namespace RestAPI.Controllers
         }
 
         [HttpPost("oborudovanie")]
+        [ApiExplorerSettings(IgnoreApi = true)] // Добавлено - скрывает метод из Swagger
         public IActionResult ImportOborudovanie([FromForm] IFormFile file)
         {
             try
@@ -123,6 +124,7 @@ namespace RestAPI.Controllers
         }
 
         [HttpPost("test")]
+        [ApiExplorerSettings(IgnoreApi = true)] // Добавлено - если метод тоже принимает файлы
         public IActionResult TestImport()
         {
             try
@@ -160,6 +162,7 @@ namespace RestAPI.Controllers
         }
 
         [HttpPost("validate")]
+        [ApiExplorerSettings(IgnoreApi = true)] // Добавлено - скрывает метод из Swagger
         public IActionResult ValidateFile([FromForm] IFormFile file)
         {
             try
