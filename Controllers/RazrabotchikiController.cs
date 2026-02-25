@@ -16,7 +16,6 @@ namespace RestAPI.Controllers
             _service = service;
         }
 
-        // СУЩЕСТВУЮЩИЕ МЕТОДЫ...
 
         // 1. Получить разработчика по ID (для WPF)
         [HttpGet("item/{id}")]

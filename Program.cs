@@ -1,10 +1,12 @@
-using System.IO;
-using System.Reflection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Graph.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi;
 using RestAPI.Connect;
 using RestAPI.Services;
+using System.IO;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +16,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowWpfClient",
         policy =>
         {
-            policy.WithOrigins("http://localhost", "https://localhost") // Добавь нужные адреса
+            policy.WithOrigins("http://localhost:3000", "https://localhost:7000")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
