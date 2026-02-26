@@ -8,6 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Connect\**" />
+    <Compile Remove="Services\**" />
+    <Content Remove="Connect\**" />
+    <Content Remove="Services\**" />
+    <EmbeddedResource Remove="Connect\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Connect\**" />
+    <None Remove="Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
@@ -17,11 +28,6 @@
     </PackageReference>
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Connect\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

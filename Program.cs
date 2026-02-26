@@ -3,6 +3,17 @@ using RestAPI.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()    // Разрешить любой источник
+                  .AllowAnyMethod()    // Разрешить любые методы (GET, POST, etc)
+                  .AllowAnyHeader();   // Разрешить любые заголовки
+        });
+});
+
 builder.Services.AddRazorPages();
 builder.Services.AddMvc(option => option.EnableEndpointRouting = true);
 builder.Services.AddSwaggerGen(option =>
@@ -59,6 +70,8 @@ builder.Services.AddSwaggerGen(option =>
 var app = builder.Build();
 
 app.UseRouting();
+
+app.UseCors("AllowAll");
 
 app.MapControllers(); // Вместо UseEndpoints
 
