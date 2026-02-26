@@ -29,7 +29,7 @@ namespace RestAPI.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySql("server=127.0.0.1;port=3307;database=EquipmentAccountingDB;uid=root;pwd=;",
+            optionsBuilder.UseMySql("server=127.0.0.1;port=3306;database=EquipmentAccountingDB;uid=root;pwd=;",
                 new MySqlServerVersion(new Version(8, 0, 0)));
         }
 
